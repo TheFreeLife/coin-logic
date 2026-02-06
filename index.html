@@ -223,6 +223,7 @@
             lastPrice: 0,
             candleData: [],
             isLoadingHistory: false, // 과거 데이터 로딩 중 여부
+            isHistoryEnded: false, // 더 이상 과거 데이터가 없는지 여부
             hoveredCandle: null,
             favorites: JSON.parse(localStorage.getItem('timeframeFavorites')) || ['minutes/1', 'minutes/15', 'minutes/60', 'days'],
             searchTerm: '',
@@ -267,6 +268,7 @@
                     id: m.market,
                     name: m.korean_name,
                     symbol: m.market.split('-')[1],
+                    exchange: 'UPBIT',
                     price: 0, 
                     change: 'EVEN', 
                     changeRate: 0, 
@@ -278,8 +280,10 @@
 
         async function fetchCandles() {
             try {
+                state.isHistoryEnded = false; // 마켓/봉 변경 시 초기화
                 const url = `https://api.upbit.com/v1/candles/${state.timeframe}?market=${state.currentMarket}&count=200`;
                 const response = await fetch(url);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 const data = await response.json();
                 state.candleData = data.map(c => ({
                     time: Math.floor(new Date(c.candle_date_time_kst).getTime() / 1000),
@@ -323,7 +327,10 @@
             listEl.innerHTML = filtered.map(m => `
                 <div onclick="changeMarket('${m.id}')" class="flex items-center justify-between p-3 border-b border-slate-700/30 cursor-pointer hover:bg-slate-700/50 transition-colors ${m.id === state.currentMarket ? 'bg-slate-700 border-l-4 border-l-primary' : ''}">
                     <div class="flex-1 min-w-0 text-left">
-                        <div class="text-[11px] font-bold truncate">${m.name}</div>
+                        <div class="flex items-center gap-1.5">
+                            <div class="text-[11px] font-bold truncate">${m.name}</div>
+                            <span class="text-[8px] bg-slate-900 text-slate-500 px-1 rounded border border-slate-700 leading-none py-0.5">${m.exchange || 'UPBIT'}</span>
+                        </div>
                         <div class="text-[9px] text-slate-500">${m.symbol}</div>
                     </div>
                     <div class="text-right flex-shrink-0 ml-2">
@@ -398,28 +405,51 @@
         }
 
         async function fetchHistory(to) {
-            if (state.isLoadingHistory) return;
+            if (state.isLoadingHistory || state.isHistoryEnded) return;
             state.isLoadingHistory = true;
             
             try {
+                // 너무 잦은 요청 방지 (300ms 딜레이)
+                await new Promise(r => setTimeout(r, 300));
+
                 const toDate = new Date(to * 1000).toISOString();
                 const url = `https://api.upbit.com/v1/candles/${state.timeframe}?market=${state.currentMarket}&count=200&to=${toDate}`;
                 const response = await fetch(url);
+                
+                if (response.status === 429) {
+                    console.warn('Too Many Requests - cooling down');
+                    // 429 발생 시 잠시 후 다시 시도할 수 있도록 처리하거나, 
+                    // 그냥 이번 요청은 실패로 처리하고 사용자가 다시 스크롤하게 함.
+                    // 여기서는 isLoadingHistory만 false로 돌려서 사용자 스크롤 시 재시도하도록 함.
+                    return; 
+                }
+                
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
                 const data = await response.json();
                 
-                if (data.length > 0) {
-                    const history = data.map(c => ({
-                        time: Math.floor(new Date(c.candle_date_time_kst).getTime() / 1000),
-                        open: c.opening_price, high: c.high_price, low: c.low_price, close: c.trade_price
-                    })).sort((a, b) => a.time - b.time);
-
-                    // 기존 데이터 앞에 붙이기 (중복 제거)
-                    const firstTime = state.candleData[0].time;
-                    const newHistory = history.filter(h => h.time < firstTime);
-                    
-                    state.candleData = [...newHistory, ...state.candleData];
-                    state.series.setData(state.candleData);
+                if (data.length === 0) {
+                    state.isHistoryEnded = true;
+                    console.log('No more history data');
+                    return;
                 }
+
+                const history = data.map(c => ({
+                    time: Math.floor(new Date(c.candle_date_time_kst).getTime() / 1000),
+                    open: c.opening_price, high: c.high_price, low: c.low_price, close: c.trade_price
+                })).sort((a, b) => a.time - b.time);
+
+                // 기존 데이터 앞에 붙이기 (중복 제거)
+                const firstTime = state.candleData[0].time;
+                const newHistory = history.filter(h => h.time < firstTime);
+                
+                if (newHistory.length === 0) {
+                    state.isHistoryEnded = true;
+                    return;
+                }
+
+                state.candleData = [...newHistory, ...state.candleData];
+                state.series.setData(state.candleData);
             } catch (error) {
                 console.error('History fetch failed:', error);
             } finally {
