@@ -31,6 +31,19 @@
             background: #334155;
             border-radius: 10px;
         }
+        /* Fullscreen Chart Style */
+        .chart-fullscreen {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            z-index: 9999 !important;
+            background: #0f172a !important;
+            margin: 0 !important;
+            border: none !important;
+            border-radius: 0 !important;
+        }
     </style>
 </head>
 <body class="text-slate-200 min-h-screen">
@@ -76,11 +89,17 @@
                             <i data-lucide="search" class="absolute left-3 top-2 w-4 h-4 text-slate-500"></i>
                             <input type="text" id="marketSearch" placeholder="코인명/심볼 검색" class="input input-xs w-full pl-9 h-8 bg-slate-900 border-slate-700 focus:border-primary">
                         </div>
-                        <div class="flex justify-between px-2 text-[10px] text-slate-500 font-bold uppercase">
-                            <span>코인명</span>
-                            <div class="flex gap-8">
-                                <span>현재가/변동</span>
-                                <span class="w-12 text-right">거래대금</span>
+                        <div class="flex justify-between px-2 text-[10px] text-slate-500 font-bold uppercase select-none">
+                            <span class="cursor-pointer hover:text-slate-300 transition-colors" onclick="setSort('name')">
+                                코인명 <span id="sort_name"></span>
+                            </span>
+                            <div class="flex gap-6">
+                                <span class="cursor-pointer hover:text-slate-300 transition-colors" onclick="setSort('changeRate')">
+                                    현재가/변동 <span id="sort_changeRate"></span>
+                                </span>
+                                <span class="w-12 text-right cursor-pointer hover:text-slate-300 transition-colors" onclick="setSort('tradePrice')">
+                                    거래대금 <span id="sort_tradePrice"></span>
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -161,7 +180,12 @@
                                 <div id="infoDiff" class="font-bold">-</div>
                             </div>
 
-                            <div class="text-[10px] text-slate-400" id="lastUpdated">-</div>
+                            <div class="flex items-center gap-4">
+                                <div class="text-[10px] text-slate-400" id="lastUpdated">-</div>
+                                <button onclick="toggleFullscreen()" class="btn btn-xs btn-ghost btn-square border border-slate-700">
+                                    <i id="fullscreenIcon" data-lucide="maximize" class="w-3 h-3 text-slate-400"></i>
+                                </button>
+                            </div>
                         </div>
                         <div id="mainChart" class="flex-1 w-full"></div>
                     </div>
@@ -198,9 +222,12 @@
             socket: null,
             lastPrice: 0,
             candleData: [],
+            isLoadingHistory: false, // 과거 데이터 로딩 중 여부
             hoveredCandle: null,
             favorites: JSON.parse(localStorage.getItem('timeframeFavorites')) || ['minutes/1', 'minutes/15', 'minutes/60', 'days'],
             searchTerm: '',
+            sortKey: 'tradePrice', // 정렬 기준: tradePrice, name, changeRate
+            sortOrder: 'desc', // 정렬 순서: asc, desc
             allTimeframes: [
                 { id: 'minutes/1', label: '1분' }, { id: 'minutes/3', label: '3분' },
                 { id: 'minutes/5', label: '5분' }, { id: 'minutes/10', label: '10분' },
@@ -240,7 +267,10 @@
                     id: m.market,
                     name: m.korean_name,
                     symbol: m.market.split('-')[1],
-                    price: 0, change: 'EVEN', changeRate: 0, tradePrice: 0
+                    price: 0, 
+                    change: 'EVEN', 
+                    changeRate: 0, 
+                    tradePrice: 0
                 }));
                 renderMarketList();
             } catch (error) { console.error('Markets fetch failed:', error); }
@@ -259,11 +289,36 @@
             } catch (error) { console.error('Candles fetch failed:', error); }
         }
 
+        function setSort(key) {
+            if (state.sortKey === key) {
+                state.sortOrder = state.sortOrder === 'asc' ? 'desc' : 'asc';
+            } else {
+                state.sortKey = key;
+                state.sortOrder = 'desc';
+            }
+            renderMarketList();
+        }
+
         function renderMarketList() {
             const listEl = document.getElementById('marketList');
             if (!listEl) return;
-            const filtered = state.markets.filter(m => m.name.includes(state.searchTerm) || m.symbol.toLowerCase().includes(state.searchTerm.toLowerCase()))
-                .sort((a, b) => b.tradePrice - a.tradePrice);
+
+            // 정렬 화살표 업데이트
+            ['name', 'changeRate', 'tradePrice'].forEach(k => {
+                const el = document.getElementById(`sort_${k}`);
+                if (el) el.innerText = state.sortKey === k ? (state.sortOrder === 'asc' ? '▲' : '▼') : '';
+            });
+
+            const filtered = state.markets.filter(m => m.name.includes(state.searchTerm) || m.symbol.toLowerCase().includes(state.searchTerm.toLowerCase()));
+            
+            // 정렬 적용
+            filtered.sort((a, b) => {
+                let valA = a[state.sortKey];
+                let valB = b[state.sortKey];
+                
+                if (state.sortOrder === 'asc') return valA > valB ? 1 : -1;
+                else return valA < valB ? 1 : -1;
+            });
 
             listEl.innerHTML = filtered.map(m => `
                 <div onclick="changeMarket('${m.id}')" class="flex items-center justify-between p-3 border-b border-slate-700/30 cursor-pointer hover:bg-slate-700/50 transition-colors ${m.id === state.currentMarket ? 'bg-slate-700 border-l-4 border-l-primary' : ''}">
@@ -342,6 +397,36 @@
             state.lastPrice = price;
         }
 
+        async function fetchHistory(to) {
+            if (state.isLoadingHistory) return;
+            state.isLoadingHistory = true;
+            
+            try {
+                const toDate = new Date(to * 1000).toISOString();
+                const url = `https://api.upbit.com/v1/candles/${state.timeframe}?market=${state.currentMarket}&count=200&to=${toDate}`;
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (data.length > 0) {
+                    const history = data.map(c => ({
+                        time: Math.floor(new Date(c.candle_date_time_kst).getTime() / 1000),
+                        open: c.opening_price, high: c.high_price, low: c.low_price, close: c.trade_price
+                    })).sort((a, b) => a.time - b.time);
+
+                    // 기존 데이터 앞에 붙이기 (중복 제거)
+                    const firstTime = state.candleData[0].time;
+                    const newHistory = history.filter(h => h.time < firstTime);
+                    
+                    state.candleData = [...newHistory, ...state.candleData];
+                    state.series.setData(state.candleData);
+                }
+            } catch (error) {
+                console.error('History fetch failed:', error);
+            } finally {
+                state.isLoadingHistory = false;
+            }
+        }
+
         function updateChart() {
             const container = document.querySelector("#mainChart");
             if (!container || container.clientWidth === 0 || !window.LightweightCharts) return;
@@ -353,9 +438,41 @@
                     layout: { background: { type: LightweightCharts.ColorType.Solid, color: 'transparent' }, textColor: '#94a3b8' },
                     grid: { vertLines: { color: '#1e293b' }, horzLines: { color: '#1e293b' } },
                     rightPriceScale: { borderColor: '#1e293b', autoScale: true },
-                    timeScale: { borderColor: '#1e293b', timeVisible: true }
+                    timeScale: { 
+                        borderColor: '#1e293b', 
+                        timeVisible: true,
+                        secondsVisible: false,
+                        tickMarkFormatter: (time, tickMarkType, locale) => {
+                            const date = new Date(time * 1000);
+                            switch(tickMarkType) {
+                                case 0: // Year
+                                    return `${date.getFullYear()}년`;
+                                case 1: // Month
+                                    return `${date.getMonth() + 1}월`;
+                                case 2: // Day
+                                    return `${date.getDate()}일`;
+                                case 3: // Time
+                                    return `${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}`;
+                                default:
+                                    return `${date.getMonth() + 1}/${date.getDate()}`;
+                            }
+                        }
+                    },
+                    localization: {
+                        locale: 'ko-KR',
+                        priceFormatter: val => fmt.format(val),
+                        dateFormat: 'yyyy-MM-dd',
+                    }
                 });
                 state.series = state.chart.addCandlestickSeries({ upColor: '#10b981', downColor: '#ef4444', borderVisible: false, wickUpColor: '#10b981', wickDownColor: '#ef4444' });
+                
+                // 스크롤 감지 (무한 스크롤)
+                state.chart.timeScale().subscribeVisibleLogicalRangeChange(range => {
+                    if (range && range.from < 10 && state.candleData.length > 0) {
+                        fetchHistory(state.candleData[0].time);
+                    }
+                });
+
                 state.chart.subscribeCrosshairMove(param => {
                     if (param && param.time) {
                         const d = param.seriesData.get(state.series);
@@ -396,6 +513,39 @@
         }
 
         function setTimeframe(id) { state.timeframe = id; localStorage.setItem('selectedTimeframe', id); renderTimeframeUI(); fetchCandles(); }
+        
+        function toggleFullscreen() {
+            const chartCard = document.querySelector('#mainChart').closest('.card');
+            const icon = document.getElementById('fullscreenIcon');
+            const isFull = chartCard.classList.toggle('chart-fullscreen');
+            
+            if (isFull) {
+                icon.setAttribute('data-lucide', 'minimize');
+            } else {
+                icon.setAttribute('data-lucide', 'maximize');
+            }
+            lucide.createIcons();
+
+            // 차트 크기 재계산
+            setTimeout(() => {
+                const container = document.querySelector("#mainChart");
+                if (state.chart && container) {
+                    state.chart.applyOptions({ 
+                        width: container.clientWidth,
+                        height: isFull ? window.innerHeight - 60 : 730 
+                    });
+                }
+            }, 100);
+        }
+
+        // ESC 키로 전체화면 해제
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                const chartCard = document.querySelector('.chart-fullscreen');
+                if (chartCard) toggleFullscreen();
+            }
+        });
+
         function toggleFavorite(id) {
             const idx = state.favorites.indexOf(id);
             if (idx > -1) { if (state.favorites.length > 1) state.favorites.splice(idx, 1); }
