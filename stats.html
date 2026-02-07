@@ -188,7 +188,11 @@
             state.chart = LightweightCharts.createChart(container, {
                 layout: { background: { type: 'solid', color: 'transparent' }, textColor: '#94a3b8' },
                 grid: { vertLines: { color: '#1e293b' }, horzLines: { color: '#1e293b' } },
-                rightPriceScale: { borderColor: '#1e293b', autoScale: true },
+                rightPriceScale: { 
+                    borderColor: '#1e293b', 
+                    autoScale: true,
+                    scaleMargins: { top: 0.05, bottom: 0.35 }
+                },
                 timeScale: { 
                     borderColor: '#1e293b', timeVisible: true, 
                     tickMarkFormatter: (time, type) => {
@@ -279,11 +283,25 @@
         function renderIndicators() {
             if (!state.chart || state.candles.length === 0) return;
             Object.values(state.indicatorSeries).forEach(s => { if (s) try { state.chart.removeSeries(s); } catch(e) {} }); state.indicatorSeries = {};
-            if (state.indicatorSettings.volume) { const s = state.chart.addHistogramSeries({ color: '#26a69a', priceFormat: { type: 'volume' }, priceScaleId: 'volume' }); s.setData(state.candles.map(c => ({ time: c.time, value: c.volume, color: c.close >= c.open ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)' }))); state.chart.priceScale('volume').applyOptions({ scaleMargins: { top: 0.8, bottom: 0 } }); state.indicatorSeries.volume = s; }
+            if (state.indicatorSettings.volume) { 
+                const s = state.chart.addHistogramSeries({ color: '#26a69a', priceFormat: { type: 'volume' }, priceScaleId: 'volume' }); 
+                s.setData(state.candles.map(c => ({ time: c.time, value: c.volume, color: c.close >= c.open ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)' }))); 
+                state.chart.priceScale('volume').applyOptions({ scaleMargins: { top: 0.85, bottom: 0 } }); state.indicatorSeries.volume = s; 
+            }
             if (state.indicatorSettings.ma_active) {
                 state.indicatorSettings.maList.forEach((period, idx) => { if (period > 0) { const s = state.chart.addLineSeries({ color: state.maColors[idx], lineWidth: 1, crosshairMarkerVisible: false, priceLineVisible: false, title: `MA${period}` }); s.setData(calculateMA(state.candles, period)); state.indicatorSeries[`ma_${idx}`] = s; } });
             }
-            if (state.indicatorSettings.rsi) { const s = state.chart.addLineSeries({ color: '#ec4899', lineWidth: 1, priceScaleId: 'rsi', title: 'RSI' }); s.setData(calculateRSI(state.candles, state.indicatorSettings.rsi_p)); state.chart.priceScale('rsi').applyOptions({ scaleMargins: { top: 0.1, bottom: 0.7 } }); state.indicatorSeries.rsi = s; }
+            if (state.indicatorSettings.rsi) { 
+                const s = state.chart.addLineSeries({ color: '#ec4899', lineWidth: 1.5, priceScaleId: 'rsi', title: 'RSI' }); 
+                s.setData(calculateRSI(state.candles, state.indicatorSettings.rsi_p)); 
+                state.chart.priceScale('rsi').applyOptions({
+                    scaleMargins: { top: 0.68, bottom: 0.18 },
+                    borderVisible: true,
+                });
+                s.createPriceLine({ price: 70, color: 'rgba(239, 68, 68, 0.4)', lineWidth: 1, lineStyle: 2, axisLabelVisible: true });
+                s.createPriceLine({ price: 30, color: 'rgba(16, 185, 129, 0.4)', lineWidth: 1, lineStyle: 2, axisLabelVisible: true });
+                state.indicatorSeries.rsi = s; 
+            }
         }
 
         function syncIndicatorUI() {

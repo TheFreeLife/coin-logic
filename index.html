@@ -390,22 +390,22 @@
             });
             state.indicatorSeries = {};
 
-            // 1. 거래량 (Volume)
+            // 1. 거래량 (Volume - 최하단 15% 영역)
             if (state.indicatorSettings.volume) {
                 const volSeries = state.chart.addHistogramSeries({
                     color: '#26a69a', priceFormat: { type: 'volume' }, priceScaleId: 'volume',
                 });
                 volSeries.setData(state.candleData.map(c => ({
                     time: c.time, value: c.volume || 0, 
-                    color: c.close >= c.open ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)'
+                    color: c.close >= c.open ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)'
                 })));
                 state.chart.priceScale('volume').applyOptions({
-                    scaleMargins: { top: 0.8, bottom: 0 },
+                    scaleMargins: { top: 0.85, bottom: 0 }, // 최하단 배치
                 });
                 state.indicatorSeries.volume = volSeries;
             }
 
-            // 2. 이동평균선들 (MA List)
+            // 2. 이동평균선들... (생략 동일 로직)
             if (state.indicatorSettings.ma_active) {
                 state.indicatorSettings.maList.forEach((period, idx) => {
                     if (period > 0) {
@@ -423,16 +423,22 @@
                 });
             }
 
-            // 3. RSI
+            // 3. RSI (하단 중간 15% 영역)
             if (state.indicatorSettings.rsi) {
                 const rsiSeries = state.chart.addLineSeries({
-                    color: '#ec4899', lineWidth: 1, priceScaleId: 'rsi', title: 'RSI',
+                    color: '#ec4899', lineWidth: 1.5, priceScaleId: 'rsi', title: 'RSI',
                 });
                 rsiSeries.setData(calculateRSI(state.candleData, state.indicatorSettings.rsi_p));
+                
                 state.chart.priceScale('rsi').applyOptions({
-                    scaleMargins: { top: 0.1, bottom: 0.7 },
+                    scaleMargins: { top: 0.68, bottom: 0.18 }, // 거래량 위쪽 영역에 배치
                     borderVisible: true,
                 });
+
+                // RSI 기준선 추가
+                rsiSeries.createPriceLine({ price: 70, color: 'rgba(239, 68, 68, 0.4)', lineWidth: 1, lineStyle: 2, axisLabelVisible: true });
+                rsiSeries.createPriceLine({ price: 30, color: 'rgba(16, 185, 129, 0.4)', lineWidth: 1, lineStyle: 2, axisLabelVisible: true });
+                
                 state.indicatorSeries.rsi = rsiSeries;
             }
         }
@@ -696,13 +702,16 @@
             const chartHeight = isMobile ? 450 : 730;
 
             if (!state.chart) {
-                state.chart = LightweightCharts.createChart(container, {
-                    width: container.offsetWidth, 
-                    height: chartHeight,
-                    layout: { background: { type: LightweightCharts.ColorType.Solid, color: 'transparent' }, textColor: '#94a3b8' },
-                    grid: { vertLines: { color: '#1e293b' }, horzLines: { color: '#1e293b' } },
-                    rightPriceScale: { borderColor: '#1e293b', autoScale: true },
-                    timeScale: { 
+                            state.chart = LightweightCharts.createChart(container, {
+                                width: container.offsetWidth, 
+                                height: chartHeight,
+                                layout: { background: { type: LightweightCharts.ColorType.Solid, color: 'transparent' }, textColor: '#94a3b8' },
+                                grid: { vertLines: { color: '#1e293b' }, horzLines: { color: '#1e293b' } },
+                                                rightPriceScale: { 
+                                                    borderColor: '#1e293b', 
+                                                    autoScale: true,
+                                                    scaleMargins: { top: 0.05, bottom: 0.35 } // 하단 35% 비움
+                                                },                    timeScale: { 
                         borderColor: '#1e293b', 
                         timeVisible: true,
                         secondsVisible: false,
