@@ -114,47 +114,47 @@
             <div class="lg:col-span-9 space-y-6 order-1 lg:order-2">
                 <!-- Top Stats -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div class="card bg-slate-800 border border-slate-700 shadow-xl overflow-hidden relative">
+                    <div class="card bg-slate-800 border border-slate-700 shadow-xl overflow-hidden relative h-32">
                         <div id="priceFlash" class="absolute inset-0 bg-emerald-500/10 opacity-0 transition-opacity duration-150"></div>
-                        <div class="card-body p-4 relative z-10">
-                            <div class="flex justify-between items-start mb-1">
-                                <span class="text-slate-400 text-[10px] font-bold uppercase tracking-wider">현재가 (실시간)</span>
-                                <div id="priceChangeBadge" class="badge badge-success badge-sm gap-1 font-bold">0%</div>
+                        <div class="card-body p-5 relative z-10 justify-center">
+                            <div class="flex justify-between items-start mb-2">
+                                <span class="text-slate-400 text-[11px] font-bold uppercase tracking-widest">현재가 (실시간)</span>
+                                <div id="priceChangeBadge" class="badge badge-success badge-md gap-1 font-bold px-3 py-3">0%</div>
                             </div>
-                            <div id="currentPrice" class="text-2xl font-bold font-mono">0</div>
-                            <div class="flex justify-between items-center mt-1">
-                                <div class="text-[9px] text-slate-500 font-mono" id="tradeTime">-</div>
-                                <div class="badge badge-outline badge-xs opacity-50 text-[9px]">UPBIT</div>
+                            <div id="currentPrice" class="text-4xl font-extrabold font-mono tracking-tight tabular-nums">0</div>
+                            <div class="flex justify-between items-center mt-2">
+                                <div class="text-[10px] text-slate-500 font-mono" id="tradeTime">-</div>
+                                <div class="badge badge-outline badge-xs opacity-50 text-[10px]">UPBIT</div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="card bg-slate-800 border border-slate-700 shadow-xl">
-                        <div class="card-body p-4 flex-row justify-between items-center">
-                            <div class="space-y-1">
+                    <div class="card bg-slate-800 border border-slate-700 shadow-xl h-32">
+                        <div class="card-body p-5 flex-row justify-between items-center tabular-nums">
+                            <div class="space-y-1 flex-1 min-w-0">
                                 <span class="text-slate-400 text-[10px] font-bold uppercase">24시간 고가</span>
-                                <div id="highPrice" class="font-mono text-emerald-400 text-sm">0</div>
+                                <div id="highPrice" class="font-mono text-emerald-400 text-sm whitespace-nowrap">0</div>
                                 <div id="highRate" class="text-[10px] text-emerald-500/80 font-bold">+0%</div>
                             </div>
-                            <div class="divider divider-horizontal mx-0"></div>
-                            <div class="space-y-1 text-right">
+                            <div class="divider divider-horizontal mx-2"></div>
+                            <div class="space-y-1 text-right flex-1 min-w-0">
                                 <span class="text-slate-400 text-[10px] font-bold uppercase">24시간 저가</span>
-                                <div id="lowPrice" class="font-mono text-rose-400 text-sm">0</div>
+                                <div id="lowPrice" class="font-mono text-rose-400 text-sm whitespace-nowrap">0</div>
                                 <div id="lowRate" class="text-[10px] text-rose-500/80 font-bold">-0%</div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="card bg-slate-800 border border-slate-700 shadow-xl">
-                        <div class="card-body p-4 flex-row justify-between items-center">
-                            <div class="space-y-1">
+                    <div class="card bg-slate-800 border border-slate-700 shadow-xl h-32">
+                        <div class="card-body p-5 flex-row justify-between items-center tabular-nums">
+                            <div class="space-y-1 flex-1 min-w-0">
                                 <span class="text-slate-400 text-[10px] font-bold uppercase">거래대금 (24h)</span>
-                                <div id="tradePrice" class="font-mono text-sm">0</div>
+                                <div id="tradePrice" class="font-mono text-sm whitespace-nowrap">0</div>
                             </div>
-                            <div class="divider divider-horizontal mx-0"></div>
-                            <div class="space-y-1 text-right">
+                            <div class="divider divider-horizontal mx-2"></div>
+                            <div class="space-y-1 text-right flex-1 min-w-0">
                                 <span class="text-slate-400 text-[10px] font-bold uppercase">거래량 (24h)</span>
-                                <div id="volume" class="font-mono text-sm uppercase">0</div>
+                                <div id="volume" class="font-mono text-sm uppercase whitespace-nowrap">0</div>
                             </div>
                         </div>
                     </div>
@@ -163,7 +163,7 @@
                 <!-- Chart Section -->
                 <div class="card bg-slate-800 border border-slate-700 shadow-xl h-[850px]">
                     <div class="card-body p-4 flex flex-col">
-                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 px-2 gap-4 flex-none">
+                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 px-2 gap-4 flex-none">
                             <div class="flex items-center gap-2 flex-wrap">
                                 <div id="favoriteTimeframes" class="flex gap-1 flex-wrap"></div>
                                 <button onclick="timeframe_modal.showModal()" class="btn btn-xs btn-ghost border border-slate-700 hover:bg-slate-700 gap-1">
@@ -172,12 +172,12 @@
                                 </button>
                             </div>
                             
-                            <div id="ohlcInfo" class="flex gap-4 text-[10px] font-mono bg-slate-900/50 px-3 py-1.5 rounded-lg border border-slate-700/50">
-                                <div class="flex gap-1"><span class="text-slate-500">O</span><span id="infoOpen" class="text-slate-200">-</span></div>
-                                <div class="flex gap-1"><span class="text-slate-500">H</span><span id="infoHigh" class="text-emerald-400">-</span></div>
-                                <div class="flex gap-1"><span class="text-slate-500">L</span><span id="infoLow" class="text-rose-400">-</span></div>
-                                <div class="flex gap-1"><span class="text-slate-500">C</span><span id="infoClose" class="text-slate-200">-</span></div>
-                                <div id="infoDiff" class="font-bold">-</div>
+                            <div id="ohlcInfo" class="flex items-center text-sm font-mono bg-slate-900/90 px-8 py-0 rounded-xl border border-slate-700 shadow-2xl w-[820px] h-14 flex-none tabular-nums overflow-hidden my-2">
+                                <div class="flex gap-2 w-[140px] flex-none items-center"><span class="text-slate-500 font-bold text-xs">O</span><span id="infoOpen" class="text-slate-200 text-base">-</span></div>
+                                <div class="flex gap-4 w-[180px] flex-none items-center"><span class="text-slate-500 font-bold text-xs">H</span><span id="infoHigh" class="text-emerald-400 text-base">-</span></div>
+                                <div class="flex gap-4 w-[180px] flex-none items-center"><span class="text-slate-500 font-bold text-xs">L</span><span id="infoLow" class="text-rose-400 text-base">-</span></div>
+                                <div class="flex gap-2 w-[140px] flex-none items-center"><span class="text-slate-500 font-bold text-xs">C</span><span id="infoClose" class="text-slate-200 text-base">-</span></div>
+                                <div id="infoDiff" class="font-bold flex-1 text-right text-base">-</div>
                             </div>
 
                             <div class="flex items-center gap-4">
