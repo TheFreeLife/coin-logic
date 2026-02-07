@@ -7,7 +7,6 @@
     <link href="https://cdn.jsdelivr.net/npm/daisyui@4.7.2/dist/full.min.css" rel="stylesheet" type="text/css" />
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- Lightweight Charts CDN -->
     <script src="https://unpkg.com/lightweight-charts@4.1.1/dist/lightweight-charts.standalone.production.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono&display=swap');
@@ -20,164 +19,85 @@
 </head>
 <body class="text-slate-200 min-h-screen">
     <div class="max-w-[1400px] mx-auto p-4 lg:p-6">
-        <!-- Header -->
         <header class="flex justify-between items-center mb-8">
             <div class="flex items-center gap-3">
-                <a href="index.html" class="bg-primary p-2 rounded-xl inline-block">
-                    <i data-lucide="trending-up" class="text-primary-content w-6 h-6"></i>
-                </a>
+                <a href="index.html" class="bg-primary p-2 rounded-xl inline-block"><i data-lucide="trending-up" class="text-primary-content w-6 h-6"></i></a>
                 <div>
                     <h1 class="text-xl font-bold tracking-tight">Strategy Tester</h1>
                     <p class="text-[10px] text-slate-400 uppercase tracking-widest">Statistical Backtesting</p>
                 </div>
             </div>
-            <a href="index.html" class="btn btn-sm btn-ghost gap-2">
-                <i data-lucide="arrow-left" class="w-4 h-4"></i>
-                차트로 돌아가기
-            </a>
+            <a href="index.html" class="btn btn-sm btn-ghost gap-2"><i data-lucide="arrow-left" class="w-4 h-4"></i>차트로 돌아가기</a>
         </header>
 
         <main class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            <!-- Sidebar: Configuration -->
             <div class="lg:col-span-4 space-y-6">
                 <div class="card bg-slate-800 border border-slate-700 shadow-xl">
                     <div class="card-body p-6 space-y-4">
-                        <h3 class="text-lg font-bold flex items-center gap-2 mb-2">
-                            <i data-lucide="settings" class="w-5 h-5 text-primary"></i>
-                            조건 설정
-                        </h3>
-
-                        <!-- Market Selection -->
+                        <h3 class="text-lg font-bold flex items-center gap-2 mb-2"><i data-lucide="settings" class="w-5 h-5 text-primary"></i>조건 설정</h3>
                         <div class="form-control w-full">
                             <label class="label"><span class="label-text text-slate-400 font-bold text-xs uppercase">대상 코인</span></label>
                             <div class="relative mb-2">
                                 <i data-lucide="search" class="absolute left-3 top-2.5 w-4 h-4 text-slate-500"></i>
                                 <input type="text" id="marketSearch" placeholder="코인명/심볼 검색" class="input input-sm w-full pl-9 bg-slate-900 border-slate-700 focus:border-primary">
                             </div>
-                            <select id="marketSelect" size="5" class="select select-bordered bg-slate-900 border-slate-700 w-full focus:border-primary h-40 custom-scrollbar">
-                                <option disabled>코인을 검색하세요</option>
-                            </select>
+                            <select id="marketSelect" size="5" class="select select-bordered bg-slate-900 border-slate-700 w-full focus:border-primary h-40 custom-scrollbar"></select>
                         </div>
-
-                        <!-- Timeframe Selection -->
                         <div class="form-control w-full">
                             <label class="label"><span class="label-text text-slate-400 font-bold text-xs uppercase">봉 주기</span></label>
                             <select id="timeframeSelect" class="select select-bordered bg-slate-900 border-slate-700 w-full focus:border-primary">
-                                <option value="minutes/1">1분봉</option>
-                                <option value="minutes/3">3분봉</option>
-                                <option value="minutes/5">5분봉</option>
-                                <option value="minutes/10">10분봉</option>
-                                <option value="minutes/15">15분봉</option>
-                                <option value="minutes/30">30분봉</option>
-                                <option value="minutes/60" selected>1시간봉</option>
-                                <option value="minutes/240">4시간봉</option>
-                                <option value="days">일봉</option>
-                                <option value="weeks">주봉</option>
-                                <option value="months">월봉</option>
+                                <option value="minutes/1">1분봉</option><option value="minutes/3">3분봉</option><option value="minutes/5">5분봉</option>
+                                <option value="minutes/10">10분봉</option><option value="minutes/15">15분봉</option><option value="minutes/30">30분봉</option>
+                                <option value="minutes/60" selected>1시간봉</option><option value="minutes/240">4시간봉</option>
+                                <option value="days">일봉</option><option value="weeks">주봉</option><option value="months">월봉</option>
                             </select>
                         </div>
-
                         <div class="divider"></div>
-
-                        <!-- Strategy Builder -->
                         <div class="space-y-4">
                             <div class="flex justify-between items-center">
                                 <h4 class="text-xs font-bold text-slate-500 uppercase">매수 조건 설정 (AND)</h4>
-                                <button type="button" onclick="addCondition()" class="btn btn-xs btn-outline btn-primary gap-1">
-                                    <i data-lucide="plus" class="w-3 h-3"></i>
-                                    조건 추가
-                                </button>
+                                <button type="button" onclick="addCondition()" class="btn btn-xs btn-outline btn-primary gap-1"><i data-lucide="plus" class="w-3 h-3"></i>조건 추가</button>
                             </div>
-                            
-                            <div id="conditionsContainer" class="space-y-3">
-                                <!-- 조건 항목이 여기에 동적으로 추가됨 -->
-                            </div>
+                            <div id="conditionsContainer" class="space-y-3"></div>
                         </div>
-
                         <div class="divider"></div>
-
-                        <!-- Exit Conditions -->
                         <div class="space-y-4">
                             <h4 class="text-xs font-bold text-slate-500 uppercase">익절 / 손절 조건</h4>
                             <div class="grid grid-cols-2 gap-4">
-                                <div class="form-control">
-                                    <label class="label"><span class="label-text text-xs">목표 수익 (%)</span></label>
-                                    <input type="number" id="takeProfit" value="5" class="input input-bordered bg-slate-900 border-slate-700 w-full focus:border-primary">
-                                </div>
-                                <div class="form-control">
-                                    <label class="label"><span class="label-text text-xs">손절 제한 (%)</span></label>
-                                    <input type="number" id="stopLoss" value="3" class="input input-bordered bg-slate-900 border-slate-700 w-full focus:border-primary">
-                                </div>
+                                <div class="form-control"><label class="label"><span class="label-text text-xs">목표 수익 (%)</span></label><input type="number" id="takeProfit" value="5" class="input input-bordered bg-slate-900 border-slate-700 w-full"></div>
+                                <div class="form-control"><label class="label"><span class="label-text text-xs">손절 제한 (%)</span></label><input type="number" id="stopLoss" value="3" class="input input-bordered bg-slate-900 border-slate-700 w-full"></div>
                             </div>
                         </div>
-
-                        <button id="runSimBtn" class="btn btn-primary w-full mt-4 gap-2">
-                            <i data-lucide="play-circle" class="w-5 h-5"></i>
-                            시뮬레이션 실행 (10k 캔들)
-                        </button>
+                        <button id="runSimBtn" class="btn btn-primary w-full mt-4 gap-2"><i data-lucide="play-circle" class="w-5 h-5"></i>시뮬레이션 실행 (10k 캔들)</button>
                     </div>
                 </div>
             </div>
 
-            <!-- Main Panel: Results -->
             <div class="lg:col-span-8 space-y-6">
-                <!-- Analysis Chart -->
                 <div class="card bg-slate-800 border border-slate-700 shadow-xl overflow-hidden min-w-0">
                     <div class="p-4 border-b border-slate-700 flex justify-between items-center bg-slate-800/50">
-                        <h3 class="font-bold flex items-center gap-2 text-sm">
-                            <i data-lucide="line-chart" class="w-4 h-4 text-primary"></i>
-                            전략 시각화 분석
-                        </h3>
-                        <div class="text-[10px] text-slate-500 font-mono" id="chartInfo">캔들 로드 대기 중</div>
+                        <h3 class="font-bold flex items-center gap-2 text-sm"><i data-lucide="line-chart" class="w-4 h-4 text-primary"></i>전략 시각화 분석</h3>
+                        <div class="flex items-center gap-4">
+                            <div class="text-[10px] text-slate-500 font-mono" id="chartInfo">로드 대기 중</div>
+                            <button onclick="indicator_modal.showModal()" class="btn btn-xs btn-ghost border border-slate-700 hover:bg-slate-700 h-7 px-2"><i data-lucide="layers" class="w-3 h-3 text-slate-400 mr-1"></i>지표 설정</button>
+                        </div>
                     </div>
-                    <div id="statsChart" class="w-full h-[400px]"></div>
+                    <div id="statsChart" class="w-full h-[450px]"></div>
                 </div>
 
-                <!-- Summary Stats -->
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="statsSummary">
-                    <div class="card bg-slate-800 border border-slate-700 p-4">
-                        <span class="text-slate-500 text-[10px] font-bold uppercase mb-1">총 매매 횟수</span>
-                        <div id="totalTrades" class="text-2xl font-bold font-mono">-</div>
-                    </div>
-                    <div class="card bg-slate-800 border border-slate-700 p-4">
-                        <span class="text-slate-500 text-[10px] font-bold uppercase mb-1">승률</span>
-                        <div id="winRate" class="text-2xl font-bold font-mono text-emerald-400">-</div>
-                    </div>
-                    <div class="card bg-slate-800 border border-slate-700 p-4">
-                        <span class="text-slate-500 text-[10px] font-bold uppercase mb-1">누적 수익률</span>
-                        <div id="totalReturn" class="text-2xl font-bold font-mono">-</div>
-                    </div>
-                    <div class="card bg-slate-800 border border-slate-700 p-4">
-                        <span class="text-slate-500 text-[10px] font-bold uppercase mb-1">평균 수익률/회</span>
-                        <div id="avgDuration" class="text-2xl font-bold font-mono">-</div>
-                    </div>
+                    <div class="card bg-slate-800 border border-slate-700 p-4"><span class="text-slate-500 text-[10px] font-bold uppercase mb-1">총 매매 횟수</span><div id="totalTrades" class="text-2xl font-bold font-mono">-</div></div>
+                    <div class="card bg-slate-800 border border-slate-700 p-4"><span class="text-slate-500 text-[10px] font-bold uppercase mb-1">승률</span><div id="winRate" class="text-2xl font-bold font-mono">-</div></div>
+                    <div class="card bg-slate-800 border border-slate-700 p-4"><span class="text-slate-500 text-[10px] font-bold uppercase mb-1">누적 수익률</span><div id="totalReturn" class="text-2xl font-bold font-mono">-</div></div>
+                    <div class="card bg-slate-800 border border-slate-700 p-4"><span class="text-slate-500 text-[10px] font-bold uppercase mb-1">평균 수익률/회</span><div id="avgDuration" class="text-2xl font-bold font-mono">-</div></div>
                 </div>
 
-                <!-- Simulation Progress/Log -->
                 <div class="card bg-slate-800 border border-slate-700 shadow-xl flex-1 overflow-hidden">
-                    <div class="p-4 border-b border-slate-700 flex justify-between items-center bg-slate-800/50">
-                        <h3 class="font-bold flex items-center gap-2 text-sm">
-                            <i data-lucide="list" class="w-4 h-4 text-primary"></i>
-                            매매 기록 (최근순)
-                        </h3>
-                        <div id="simStatus" class="text-[10px] uppercase font-bold text-slate-500">대기 중</div>
-                    </div>
-                    <div class="overflow-x-auto h-[550px] custom-scrollbar">
+                    <div class="p-4 border-b border-slate-700 flex justify-between items-center bg-slate-800/50"><h3 class="font-bold flex items-center gap-2 text-sm"><i data-lucide="list" class="w-4 h-4 text-primary"></i>매매 기록</h3><div id="simStatus" class="text-[10px] uppercase font-bold text-slate-500">대기 중</div></div>
+                    <div class="overflow-x-auto h-[450px] custom-scrollbar">
                         <table class="table table-pin-rows bg-slate-800">
-                            <thead>
-                                <tr class="bg-slate-900/50 text-slate-400 border-b border-slate-700">
-                                    <th>날짜/시간</th>
-                                    <th>매수가</th>
-                                    <th>매도가</th>
-                                    <th>수익률</th>
-                                    <th>결과</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tradeLog">
-                                <tr>
-                                    <td colspan="5" class="text-center py-20 text-slate-500">조건 설정 후 시뮬레이션을 실행하세요.</td>
-                                </tr>
-                            </tbody>
+                            <thead><tr class="bg-slate-900/50 text-slate-400 border-b border-slate-700"><th>날짜/시간</th><th>매수가</th><th>매도가</th><th>수익률</th><th>결과</th></tr></thead>
+                            <tbody id="tradeLog"><tr><td colspan="5" class="text-center py-20 text-slate-500">시뮬레이션을 실행하세요.</td></tr></tbody>
                         </table>
                     </div>
                 </div>
@@ -185,125 +105,28 @@
         </main>
     </div>
 
+    <dialog id="indicator_modal" class="modal">
+        <div class="modal-box bg-slate-800 border border-slate-700 max-w-sm">
+            <h3 class="font-bold text-lg mb-4 flex items-center gap-2"><i data-lucide="layers" class="w-5 h-5 text-primary"></i>지표 설정</h3>
+            <div class="space-y-4">
+                <div class="form-control"><label class="label cursor-pointer justify-start gap-4"><input type="checkbox" class="checkbox checkbox-primary" id="check_volume" onchange="toggleIndicator('volume', this.checked)"><span class="label-text">거래량 (Volume)</span></label></div>
+                <div class="form-control"><label class="label cursor-pointer justify-start gap-4"><input type="checkbox" class="checkbox checkbox-primary" id="check_ma5" onchange="toggleIndicator('ma5', this.checked)"><span class="label-text">MA5</span></label></div>
+                <div class="form-control"><label class="label cursor-pointer justify-start gap-4"><input type="checkbox" class="checkbox checkbox-primary" id="check_ma20" onchange="toggleIndicator('ma20', this.checked)"><span class="label-text">MA20</span></label></div>
+                <div class="form-control"><label class="label cursor-pointer justify-start gap-4"><input type="checkbox" class="checkbox checkbox-primary" id="check_ma60" onchange="toggleIndicator('ma60', this.checked)"><span class="label-text">MA60</span></label></div>
+                <div class="form-control"><label class="label cursor-pointer justify-start gap-4"><input type="checkbox" class="checkbox checkbox-primary" id="check_rsi" onchange="toggleIndicator('rsi', this.checked)"><span class="label-text">RSI</span></label></div>
+            </div>
+            <div class="modal-action"><form method="dialog"><button class="btn btn-sm btn-primary">닫기</button></form></div>
+        </div>
+    </dialog>
+
     <script>
         const state = {
-            markets: [],
-            candles: [],
-            isSimulating: false,
-            chart: null,
-            series: null,
-            isLoadingHistory: false,
-            isHistoryEnded: false,
-            conditionId: 0
+            markets: [], candles: [], isSimulating: false, chart: null, series: null,
+            isLoadingHistory: false, isHistoryEnded: false, conditionId: 0,
+            indicatorSettings: JSON.parse(localStorage.getItem('indicatorSettings')) || { volume: true, ma5: true, ma20: true, ma60: false, rsi: false },
+            indicatorSeries: {}
         };
-
         const fmt = new Intl.NumberFormat('ko-KR');
-
-        function addCondition() {
-            const container = document.getElementById('conditionsContainer');
-            const id = state.conditionId++;
-            const div = document.createElement('div');
-            div.className = 'bg-slate-900/50 p-3 rounded-lg border border-slate-700/50 space-y-2 relative group';
-            div.id = `cond-${id}`;
-            div.innerHTML = `
-                <button onclick="removeCondition(${id})" class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 btn btn-ghost btn-xs btn-square text-rose-500 transition-opacity">
-                    <i data-lucide="x" class="w-3 h-3"></i>
-                </button>
-                <div class="form-control w-full">
-                    <select onchange="updateConditionParams(${id}, this.value)" class="select select-xs bg-slate-800 border-slate-700 w-full mb-2">
-                        <option value="rsi">RSI</option>
-                        <option value="ma_cross">이평선 크로스</option>
-                        <option value="ma_price">이평선 vs 가격</option>
-                        <option value="price_change">가격 변동률</option>
-                    </select>
-                </div>
-                <div id="cond-params-${id}" class="grid grid-cols-2 gap-2">
-                    <!-- 파라미터가 여기에 렌더링됨 -->
-                </div>
-            `;
-            container.appendChild(div);
-            updateConditionParams(id, 'rsi'); // 기본값으로 초기화
-            lucide.createIcons();
-        }
-
-        function removeCondition(id) {
-            const el = document.getElementById(`cond-${id}`);
-            if (el) el.remove();
-        }
-
-        function updateConditionParams(id, type) {
-            const paramContainer = document.getElementById(`cond-params-${id}`);
-            let html = '';
-            if (type === 'rsi') {
-                html = `
-                    <div class="form-control">
-                        <label class="label py-0"><span class="label-text text-[10px]">기간</span></label>
-                        <input type="number" class="param-period input input-xs bg-slate-800 border-slate-700 w-full" value="14">
-                    </div>
-                    <div class="form-control">
-                        <label class="label py-0"><span class="label-text text-[10px]">기준/비교</span></label>
-                        <div class="flex gap-1">
-                            <select class="param-op select select-xs bg-slate-800 border-slate-700 flex-1 px-1">
-                                <option value="under">이하</option>
-                                <option value="over">이상</option>
-                                <option value="cross_up">상향돌파</option>
-                            </select>
-                            <input type="number" class="param-val input input-xs bg-slate-800 border-slate-700 w-12 px-1" value="30">
-                        </div>
-                    </div>
-                `;
-            } else if (type === 'ma_cross') {
-                html = `
-                    <div class="form-control">
-                        <label class="label py-0"><span class="label-text text-[10px]">단기/장기</span></label>
-                        <div class="flex gap-1">
-                            <input type="number" class="param-short input input-xs bg-slate-800 border-slate-700 w-full" value="5">
-                            <input type="number" class="param-long input input-xs bg-slate-800 border-slate-700 w-full" value="20">
-                        </div>
-                    </div>
-                    <div class="form-control">
-                        <label class="label py-0"><span class="label-text text-[10px]">비교</span></label>
-                        <select class="param-op select select-xs bg-slate-800 border-slate-700 w-full">
-                            <option value="golden">골든크로스</option>
-                            <option value="dead">데드크로스</option>
-                        </select>
-                    </div>
-                `;
-            } else if (type === 'ma_price') {
-                html = `
-                    <div class="form-control">
-                        <label class="label py-0"><span class="label-text text-[10px]">이평선 기간</span></label>
-                        <input type="number" class="param-period input input-xs bg-slate-800 border-slate-700 w-full" value="20">
-                    </div>
-                    <div class="form-control">
-                        <label class="label py-0"><span class="label-text text-[10px]">가격 위치</span></label>
-                        <select class="param-op select select-xs bg-slate-800 border-slate-700 w-full">
-                            <option value="above">이평선 위</option>
-                            <option value="below">이평선 아래</option>
-                        </select>
-                    </div>
-                `;
-            } else if (type === 'price_change') {
-                html = `
-                    <div class="form-control">
-                        <label class="label py-0"><span class="label-text text-[10px]">직전 N봉</span></label>
-                        <input type="number" class="param-period input input-xs bg-slate-800 border-slate-700 w-full" value="1">
-                    </div>
-                    <div class="form-control">
-                        <label class="label py-0"><span class="label-text text-[10px]">변동률(%)</span></label>
-                        <div class="flex gap-1">
-                            <select class="param-op select select-xs bg-slate-800 border-slate-700 flex-1">
-                                <option value="down">이상 하락</option>
-                                <option value="up">이상 상승</option>
-                            </select>
-                            <input type="number" class="param-val input input-xs bg-slate-800 border-slate-700 w-12 px-1" value="5">
-                        </div>
-                    </div>
-                `;
-            }
-            paramContainer.innerHTML = html;
-            paramContainer.setAttribute('data-type', type);
-        }
 
         function initChart() {
             const container = document.getElementById('statsChart');
@@ -325,245 +148,146 @@
             const market = document.getElementById('marketSelect').value;
             const timeframe = document.getElementById('timeframeSelect').value;
             const firstTime = state.candles[0].time;
-            const toDate = new Date(firstTime * 1000).toISOString();
             try {
-                const response = await fetch(`https://api.upbit.com/v1/candles/${timeframe}?market=${market}&count=200&to=${toDate}`);
+                const response = await fetch(`https://api.upbit.com/v1/candles/${timeframe}?market=${market}&count=200&to=${new Date(firstTime * 1000).toISOString()}`);
                 const data = await response.json();
                 if (data.length === 0) { state.isHistoryEnded = true; return; }
-                const history = data.map(c => ({
-                    time: Math.floor(new Date(c.candle_date_time_kst).getTime() / 1000),
-                    open: c.opening_price, high: c.high_price, low: c.low_price, close: c.trade_price,
-                    raw_time: c.candle_date_time_kst
-                })).sort((a, b) => a.time - b.time);
+                const history = data.map(c => ({ time: Math.floor(new Date(c.candle_date_time_kst).getTime() / 1000), open: c.opening_price, high: c.high_price, low: c.low_price, close: c.trade_price, volume: c.candle_acc_trade_volume, raw_time: c.candle_date_time_kst })).sort((a, b) => a.time - b.time);
                 const newHistory = history.filter(h => h.time < firstTime);
                 if (newHistory.length === 0) { state.isHistoryEnded = true; return; }
-                
-                // 스크롤 위치 보존을 위한 현재 범위 저장
-                const timeScale = state.chart.timeScale();
-                const currentRange = timeScale.getVisibleLogicalRange();
-                const addedCount = newHistory.length;
-
+                const timeScale = state.chart.timeScale(), currentRange = timeScale.getVisibleLogicalRange(), addedCount = newHistory.length;
                 state.candles = [...newHistory, ...state.candles];
                 state.series.setData(state.candles);
+                renderIndicators();
+                if (currentRange) timeScale.setVisibleLogicalRange({ from: currentRange.from + addedCount, to: currentRange.to + addedCount });
                 document.getElementById('chartInfo').innerText = `총 ${state.candles.length.toLocaleString()}개의 캔들 로드됨`;
-
-                // 추가된 데이터 개수만큼 범위를 이동시켜 시야 유지
-                if (currentRange !== null) {
-                    timeScale.setVisibleLogicalRange({
-                        from: currentRange.from + addedCount,
-                        to: currentRange.to + addedCount,
-                    });
-                }
             } catch (e) { console.error(e); } finally { state.isLoadingHistory = false; }
         }
 
         async function updatePreviewChart() {
-            const market = document.getElementById('marketSelect').value;
-            const timeframe = document.getElementById('timeframeSelect').value;
+            const market = document.getElementById('marketSelect').value, timeframe = document.getElementById('timeframeSelect').value;
             if (!market || !timeframe) return;
             try {
                 const response = await fetch(`https://api.upbit.com/v1/candles/${timeframe}?market=${market}&count=200`);
-                const rawData = await response.json();
-                state.candles = rawData.map(c => ({
-                    time: Math.floor(new Date(c.candle_date_time_kst).getTime() / 1000),
-                    open: c.opening_price, high: c.high_price, low: c.low_price, close: c.trade_price,
-                    raw_time: c.candle_date_time_kst
-                })).sort((a, b) => a.time - b.time);
+                const data = await response.json();
+                state.candles = data.map(c => ({ time: Math.floor(new Date(c.candle_date_time_kst).getTime() / 1000), open: c.opening_price, high: c.high_price, low: c.low_price, close: c.trade_price, volume: c.candle_acc_trade_volume, raw_time: c.candle_date_time_kst })).sort((a, b) => a.time - b.time);
                 state.series.setData(state.candles);
                 state.chart.timeScale().fitContent();
-                state.series.setMarkers([]);
-                state.isHistoryEnded = false;
+                state.series.setMarkers([]); state.isHistoryEnded = false;
+                renderIndicators();
                 document.getElementById('chartInfo').innerText = `총 ${state.candles.length.toLocaleString()}개의 캔들 로드됨`;
             } catch (e) { console.error(e); }
         }
 
         async function fetchLargeData(market, timeframe, targetCount = 10000) {
-            let allCandles = [];
-            let lastTime = null;
-            const chunks = Math.ceil(targetCount / 200);
+            let allCandles = [], lastTime = null; const chunks = Math.ceil(targetCount / 200);
             for (let i = 0; i < chunks; i++) {
-                const toParam = lastTime ? `&to=${lastTime}` : '';
-                const response = await fetch(`https://api.upbit.com/v1/candles/${timeframe}?market=${market}&count=200${toParam}`);
+                const response = await fetch(`https://api.upbit.com/v1/candles/${timeframe}?market=${market}&count=200${lastTime ? '&to=' + lastTime : ''}`);
                 const data = await response.json();
                 if (!data || data.length === 0) break;
-                const chunk = data.map(c => ({
-                    time: Math.floor(new Date(c.candle_date_time_kst).getTime() / 1000),
-                    open: c.opening_price, high: c.high_price, low: c.low_price, close: c.trade_price,
-                    raw_time: c.candle_date_time_kst
-                }));
+                const chunk = data.map(c => ({ time: Math.floor(new Date(c.candle_date_time_kst).getTime() / 1000), open: c.opening_price, high: c.high_price, low: c.low_price, close: c.trade_price, volume: c.candle_acc_trade_volume, raw_time: c.candle_date_time_kst }));
                 allCandles = [...chunk.reverse(), ...allCandles];
                 lastTime = data[data.length - 1].candle_date_time_kst;
                 document.getElementById('simStatus').innerText = `수집 중 (${Math.round(((i + 1) / chunks) * 100)}%)`;
-                await new Promise(r => setTimeout(r, 100));
+                await new Promise(r => setTimeout(r, 50));
             }
             return allCandles.sort((a, b) => a.time - b.time);
         }
 
-        function calculateRSI(data, period = 14) {
-            let gains = [], losses = [];
-            for (let i = 1; i < data.length; i++) {
-                let diff = data[i].close - data[i-1].close;
-                gains.push(Math.max(0, diff)); losses.push(Math.max(0, -diff));
-            }
-            let avgGain = gains.slice(0, period).reduce((a, b) => a + b) / period;
-            let avgLoss = losses.slice(0, period).reduce((a, b) => a + b) / period;
-            let rsi = new Array(period).fill(null);
-            for (let i = period; i < data.length; i++) {
-                avgGain = (avgGain * (period - 1) + gains[i-1]) / period;
-                avgLoss = (avgLoss * (period - 1) + losses[i-1]) / period;
-                rsi.push(100 - (100 / (1 + (avgGain / avgLoss))));
-            }
-            return rsi;
+        function calculateMA(data, p) { return data.map((_, i) => i < p - 1 ? null : { time: data[i].time, value: data.slice(i - p + 1, i + 1).reduce((acc, c) => acc + c.close, 0) / p }).filter(v => v !== null); }
+        function calculateRSI(data, p = 14) {
+            let g = [], l = []; for (let i = 1; i < data.length; i++) { let d = data[i].close - data[i-1].close; g.push(Math.max(0, d)); l.push(Math.max(0, -d)); }
+            let ag = g.slice(0, p).reduce((a, b) => a + b, 0) / p, al = l.slice(0, p).reduce((a, b) => a + b, 0) / p, r = [];
+            for (let i = p; i < data.length; i++) { ag = (ag * (p - 1) + g[i-1]) / p; al = (al * (p - 1) + l[i-1]) / p; r.push({ time: data[i].time, value: 100 - (100 / (1 + (ag / al))) }); }
+            return r;
         }
 
-        function calculateMA(data, period) {
-            let ma = [];
-            for (let i = 0; i < data.length; i++) {
-                if (i < period - 1) { ma.push(null); continue; }
-                let sum = 0; for (let j = 0; j < period; j++) sum += data[i-j].close;
-                ma.push(sum / period);
+        function toggleIndicator(k, c) { state.indicatorSettings[k] = c; localStorage.setItem('indicatorSettings', JSON.stringify(state.indicatorSettings)); renderIndicators(); }
+        function renderIndicators() {
+            if (!state.chart || state.candles.length === 0) return;
+            Object.values(state.indicatorSeries).forEach(s => { if (s) try { state.chart.removeSeries(s); } catch(e) {} }); state.indicatorSeries = {};
+            if (state.indicatorSettings.volume) {
+                const s = state.chart.addHistogramSeries({ color: '#26a69a', priceFormat: { type: 'volume' }, priceScaleId: 'volume' });
+                s.setData(state.candles.map(c => ({ time: c.time, value: c.volume, color: c.close >= c.open ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)' })));
+                state.chart.priceScale('volume').applyOptions({ scaleMargins: { top: 0.8, bottom: 0 } }); state.indicatorSeries.volume = s;
             }
-            return ma;
+            const maC = { ma5: { p: 5, c: '#f59e0b' }, ma20: { p: 20, c: '#3b82f6' }, ma60: { p: 60, c: '#a855f7' } };
+            Object.entries(maC).forEach(([k, v]) => { if (state.indicatorSettings[k]) { const s = state.chart.addLineSeries({ color: v.c, lineWidth: 1, crosshairMarkerVisible: false, priceLineVisible: false }); s.setData(calculateMA(state.candles, v.p)); state.indicatorSeries[k] = s; } });
+            if (state.indicatorSettings.rsi) {
+                const s = state.chart.addLineSeries({ color: '#ec4899', lineWidth: 1, priceScaleId: 'rsi', title: 'RSI' });
+                s.setData(calculateRSI(state.candles)); state.chart.priceScale('rsi').applyOptions({ scaleMargins: { top: 0.1, bottom: 0.7 } }); state.indicatorSeries.rsi = s;
+            }
+        }
+
+        function addCondition() {
+            const id = state.conditionId++; const div = document.createElement('div');
+            div.className = 'bg-slate-900/50 p-3 rounded-lg border border-slate-700/50 space-y-2 relative group'; div.id = `cond-${id}`;
+            div.innerHTML = `<button onclick="removeCondition(${id})" class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 btn btn-ghost btn-xs btn-square text-rose-500 transition-opacity"><i data-lucide="x" class="w-3 h-3"></i></button><div class="form-control w-full"><select onchange="updateConditionParams(${id}, this.value)" class="select select-xs bg-slate-800 border-slate-700 w-full mb-2"><option value="rsi">RSI</option><option value="ma_cross">이평선 크로스</option><option value="ma_price">이평선 vs 가격</option><option value="price_change">가격 변동률</option></select></div><div id="cond-params-${id}" class="grid grid-cols-2 gap-2"></div>`;
+            document.getElementById('conditionsContainer').appendChild(div); updateConditionParams(id, 'rsi'); lucide.createIcons();
+        }
+        function removeCondition(id) { const el = document.getElementById(`cond-${id}`); if (el) el.remove(); }
+        function updateConditionParams(id, type) {
+            const p = document.getElementById(`cond-params-${id}`); let h = '';
+            if (type === 'rsi') h = `<div class="form-control"><label class="label py-0"><span class="label-text text-[10px]">기간</span></label><input type="number" class="param-period input input-xs bg-slate-800" value="14"></div><div class="form-control"><label class="label py-0"><span class="label-text text-[10px]">비교</span></label><div class="flex gap-1"><select class="param-op select select-xs bg-slate-800 flex-1"><option value="under">이하</option><option value="over">이상</option><option value="cross_up">상향돌파</option></select><input type="number" class="param-val input input-xs bg-slate-800 w-12" value="30"></div></div>`;
+            else if (type === 'ma_cross') h = `<div class="form-control"><label class="label py-0"><span class="label-text text-[10px]">단기/장기</span></label><div class="flex gap-1"><input type="number" class="param-short input input-xs bg-slate-800 w-full" value="5"><input type="number" class="param-long input input-xs bg-slate-800 w-full" value="20"></div></div><div class="form-control"><label class="label py-0"><span class="label-text text-[10px]">비교</span></label><select class="param-op select select-xs bg-slate-800 w-full"><option value="golden">골든크로스</option><option value="dead">데드크로스</option></select></div>`;
+            else if (type === 'ma_price') h = `<div class="form-control"><label class="label py-0"><span class="label-text text-[10px]">이평선 기간</span></label><input type="number" class="param-period input input-xs bg-slate-800 w-full" value="20"></div><div class="form-control"><label class="label py-0"><span class="label-text text-[10px]">위치</span></label><select class="param-op select select-xs bg-slate-800 w-full"><option value="above">위</option><option value="below">아래</option></select></div>`;
+            else if (type === 'price_change') h = `<div class="form-control"><label class="label py-0"><span class="label-text text-[10px]">N봉전 대비</span></label><input type="number" class="param-period input input-xs bg-slate-800 w-full" value="1"></div><div class="form-control"><label class="label py-0"><span class="label-text text-[10px]">변동률(%)</span></label><div class="flex gap-1"><select class="param-op select select-xs bg-slate-800 flex-1"><option value="down">하락</option><option value="up">상승</option></select><input type="number" class="param-val input input-xs bg-slate-800 w-12" value="5"></div></div>`;
+            p.innerHTML = h; p.setAttribute('data-type', type);
         }
 
         document.getElementById('runSimBtn').addEventListener('click', async () => {
             if (state.isSimulating) return;
-            const market = document.getElementById('marketSelect').value;
-            const timeframe = document.getElementById('timeframeSelect').value;
-            const tp = parseFloat(document.getElementById('takeProfit').value) / 100;
-            const sl = parseFloat(document.getElementById('stopLoss').value) / 100;
-
-            // 조건 수집
+            const market = document.getElementById('marketSelect').value, timeframe = document.getElementById('timeframeSelect').value;
+            const tp = parseFloat(document.getElementById('takeProfit').value) / 100, sl = parseFloat(document.getElementById('stopLoss').value) / 100;
             const conditionEls = document.querySelectorAll('#conditionsContainer > div');
-            if (conditionEls.length === 0) { alert("최소 하나 이상의 매수 조건을 추가하세요."); return; }
-
+            if (conditionEls.length === 0) { alert("매수 조건을 추가하세요."); return; }
             const activeConditions = Array.from(conditionEls).map(el => {
-                const id = el.id.split('-')[1];
-                const type = document.getElementById(`cond-params-${id}`).getAttribute('data-type');
-                const params = {};
-                el.querySelectorAll('input, select').forEach(input => {
-                    const key = input.className.match(/param-([\w-]+)/)?.[1];
-                    if (key) params[key] = input.value;
-                });
-                // 최상단 select의 type도 포함
-                params.type = type;
+                const id = el.id.split('-')[1], type = document.getElementById(`cond-params-${id}`).getAttribute('data-type'), params = { type };
+                el.querySelectorAll('input, select').forEach(input => { const key = input.className.match(/param-([\w-]+)/)?.[1]; if (key) params[key] = input.value; });
                 return params;
             });
-
-            state.isSimulating = true;
-            document.getElementById('runSimBtn').innerText = "데이터 수집 중...";
+            state.isSimulating = true; document.getElementById('runSimBtn').innerText = "데이터 수집 중...";
             try {
-                const candles = await fetchLargeData(market, timeframe, 10000);
-                state.candles = candles;
-                document.getElementById('simStatus').innerText = "조건 분석 중...";
-
-                // 필요한 모든 지표 미리 계산
+                const candles = await fetchLargeData(market, timeframe, 10000); state.candles = candles;
+                document.getElementById('simStatus').innerText = "분석 중...";
                 const indicators = {};
                 activeConditions.forEach((cond, idx) => {
                     const key = `${cond.type}_${idx}`;
-                    if (cond.type === 'rsi') indicators[key] = calculateRSI(candles, parseInt(cond.period));
-                    if (cond.type === 'ma_cross') {
-                        indicators[`${key}_short`] = calculateMA(candles, parseInt(cond.short));
-                        indicators[`${key}_long`] = calculateMA(candles, parseInt(cond.long));
-                    }
-                    if (cond.type === 'ma_price') indicators[key] = calculateMA(candles, parseInt(cond.period));
+                    if (cond.type === 'rsi') indicators[key] = calculateRSI(candles, parseInt(cond.period)).map(v => v.value);
+                    if (cond.type === 'ma_cross') { indicators[`${key}_short`] = calculateMA(candles, parseInt(cond.short)).map(v => v.value); indicators[`${key}_long`] = calculateMA(candles, parseInt(cond.long)).map(v => v.value); }
+                    if (cond.type === 'ma_price') indicators[key] = calculateMA(candles, parseInt(cond.period)).map(v => v.value);
                 });
-
                 let trades = [], activeTrade = null;
-
-                for (let i = 20; i < candles.length; i++) { // MA 장기 이평선을 고려해 20부터 시작
-                    const current = candles[i];
+                for (let i = 60; i < candles.length; i++) {
+                    const cur = candles[i];
                     if (!activeTrade) {
-                        // 모든 조건이 참(AND)인지 체크
-                        const isBuySignal = activeConditions.every((cond, idx) => {
+                        if (activeConditions.every((cond, idx) => {
                             const key = `${cond.type}_${idx}`;
-                            if (cond.type === 'rsi') {
-                                const val = indicators[key][i];
-                                if (val === null) return false;
-                                if (cond.op === 'under') return val <= parseFloat(cond.val);
-                                if (cond.op === 'over') return val >= parseFloat(cond.val);
-                                if (cond.op === 'cross_up') return indicators[key][i-1] < parseFloat(cond.val) && val >= parseFloat(cond.val);
-                            }
-                            if (cond.type === 'ma_cross') {
-                                const s = indicators[`${key}_short`][i], l = indicators[`${key}_long`][i];
-                                const ps = indicators[`${key}_short`][i-1], pl = indicators[`${key}_long`][i-1];
-                                if (s === null || l === null || ps === null || pl === null) return false;
-                                if (cond.op === 'golden') return ps <= pl && s > l;
-                                if (cond.op === 'dead') return ps >= pl && s < l;
-                            }
-                            if (cond.type === 'ma_price') {
-                                const ma = indicators[key][i];
-                                if (ma === null) return false;
-                                if (cond.op === 'above') return current.close > ma;
-                                if (cond.op === 'below') return current.close < ma;
-                            }
-                            if (cond.type === 'price_change') {
-                                const prev = candles[i - parseInt(cond.period)];
-                                if (!prev) return false;
-                                const change = (current.close - prev.close) / prev.close * 100;
-                                if (cond.op === 'down') return change <= -parseFloat(cond.val);
-                                if (cond.op === 'up') return change >= parseFloat(cond.val);
-                            }
+                            if (cond.type === 'rsi') { const v = indicators[key][i - parseInt(cond.period)]; if (!v) return false; if (cond.op === 'under') return v <= parseFloat(cond.val); if (cond.op === 'over') return v >= parseFloat(cond.val); if (cond.op === 'cross_up') return indicators[key][i-1-parseInt(cond.period)] < parseFloat(cond.val) && v >= parseFloat(cond.val); }
+                            if (cond.type === 'ma_cross') { const s = indicators[`${key}_short`][i-parseInt(cond.short)], l = indicators[`${key}_long`][i-parseInt(cond.long)]; if (!s || !l) return false; if (cond.op === 'golden') return indicators[`${key}_short`][i-1-parseInt(cond.short)] <= indicators[`${key}_long`][i-1-parseInt(cond.long)] && s > l; if (cond.op === 'dead') return indicators[`${key}_short`][i-1-parseInt(cond.short)] >= indicators[`${key}_long`][i-1-parseInt(cond.long)] && s < l; }
+                            if (cond.type === 'ma_price') { const ma = indicators[key][i-parseInt(cond.period)]; if (!ma) return false; return cond.op === 'above' ? cur.close > ma : cur.close < ma; }
+                            if (cond.type === 'price_change') { const prev = candles[i - parseInt(cond.period)]; if (!prev) return false; const chg = (cur.close - prev.close) / prev.close * 100; return cond.op === 'down' ? chg <= -parseFloat(cond.val) : chg >= parseFloat(cond.val); }
                             return false;
-                        });
-
-                        if (isBuySignal) activeTrade = { entryPrice: current.close, entryTime: current.raw_time };
+                        })) activeTrade = { entryPrice: cur.close, entryTime: cur.raw_time };
                     } else {
-                        const profit = (current.close - activeTrade.entryPrice) / activeTrade.entryPrice;
-                        if (profit >= tp || profit <= -sl) {
-                            trades.push({ ...activeTrade, exitPrice: current.close, exitTime: current.raw_time, profitRate: profit * 100 });
-                            activeTrade = null;
-                        }
+                        const profit = (cur.close - activeTrade.entryPrice) / activeTrade.entryPrice;
+                        if (profit >= tp || profit <= -sl) { trades.push({ ...activeTrade, exitPrice: cur.close, exitTime: cur.raw_time, profitRate: profit * 100 }); activeTrade = null; }
                     }
                 }
-                
-                // 결과 렌더링
-                state.series.setData(state.candles);
-                document.getElementById('chartInfo').innerText = `캔들 ${state.candles.length}개 분석 완료`;
-                const markers = [];
-                trades.forEach(t => {
-                    markers.push({ time: Math.floor(new Date(t.entryTime).getTime() / 1000), position: 'belowBar', color: '#10b981', shape: 'arrowUp', text: 'BUY' });
-                    markers.push({ time: Math.floor(new Date(t.exitTime).getTime() / 1000), position: 'aboveBar', color: '#ef4444', shape: 'arrowDown', text: 'SELL' });
-                });
-                state.series.setMarkers(markers.sort((a, b) => a.time - b.time));
-                state.chart.timeScale().fitContent();
-                renderResults(trades);
-            } catch (e) { 
-                console.error(e);
-                alert("시뮬레이션 분석 중 오류가 발생했습니다.");
-            } finally {
-                state.isSimulating = false;
-                document.getElementById('runSimBtn').innerHTML = '<i data-lucide="play-circle" class="w-5 h-5"></i>시뮬레이션 실행 (10k 캔들)';
-                document.getElementById('simStatus').innerText = "완료";
-                lucide.createIcons();
-            }
+                state.series.setData(state.candles); renderIndicators();
+                const markers = []; trades.forEach(t => { markers.push({ time: Math.floor(new Date(t.entryTime).getTime()/1000), position: 'belowBar', color: '#10b981', shape: 'arrowUp', text: 'BUY' }); markers.push({ time: Math.floor(new Date(t.exitTime).getTime()/1000), position: 'aboveBar', color: '#ef4444', shape: 'arrowDown', text: 'SELL' }); });
+                state.series.setMarkers(markers.sort((a,b)=>a.time-b.time)); state.chart.timeScale().fitContent(); renderResults(trades);
+            } catch (e) { console.error(e); } finally { state.isSimulating = false; document.getElementById('runSimBtn').innerHTML = '<i data-lucide="play-circle" class="w-5 h-5"></i>시뮬레이션 실행 (10k 캔들)'; document.getElementById('simStatus').innerText = "완료"; lucide.createIcons(); }
         });
 
         function renderResults(trades) {
             const logEl = document.getElementById('tradeLog');
-            if (trades.length === 0) {
-                logEl.innerHTML = '<tr><td colspan="5" class="text-center py-20 text-slate-500">체결된 거래가 없습니다.</td></tr>';
-                ['totalTrades', 'winRate', 'totalReturn', 'avgDuration'].forEach(id => document.getElementById(id).innerText = "-");
-                return;
-            }
-            const winCount = trades.filter(t => t.profitRate > 0).length;
-            const winRate = (winCount / trades.length * 100).toFixed(1);
-            const totalReturn = trades.reduce((acc, t) => acc + t.profitRate, 0).toFixed(2);
-            document.getElementById('totalTrades').innerText = trades.length;
-            document.getElementById('winRate').innerText = winRate + "%";
-            document.getElementById('winRate').className = `text-2xl font-bold font-mono ${winRate >= 50 ? 'text-emerald-400' : 'text-rose-400'}`;
-            document.getElementById('totalReturn').innerText = totalReturn + "%";
-            document.getElementById('totalReturn').className = `text-2xl font-bold font-mono ${totalReturn >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
+            if (trades.length === 0) { logEl.innerHTML = '<tr><td colspan="5" class="text-center py-20 text-slate-500">체결된 거래가 없습니다.</td></tr>'; ['totalTrades', 'winRate', 'totalReturn', 'avgDuration'].forEach(id => document.getElementById(id).innerText = "-"); return; }
+            const winCount = trades.filter(t => t.profitRate > 0).length, winRate = (winCount / trades.length * 100).toFixed(1), totalReturn = trades.reduce((acc, t) => acc + t.profitRate, 0).toFixed(2);
+            document.getElementById('totalTrades').innerText = trades.length; document.getElementById('winRate').innerText = winRate + "%"; document.getElementById('winRate').className = `text-2xl font-bold font-mono ${winRate >= 50 ? 'text-emerald-400' : 'text-rose-400'}`;
+            document.getElementById('totalReturn').innerText = totalReturn + "%"; document.getElementById('totalReturn').className = `text-2xl font-bold font-mono ${totalReturn >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
             document.getElementById('avgDuration').innerText = (totalReturn / trades.length).toFixed(2) + "%";
-            logEl.innerHTML = trades.reverse().map(t => `
-                <tr class="hover:bg-slate-700/30 border-b border-slate-700/50 transition-colors text-xs">
-                    <td class="text-[10px] text-slate-400 font-mono">${t.entryTime.replace('T', ' ')}</td>
-                    <td class="font-mono">${fmt.format(t.entryPrice)}</td>
-                    <td class="font-mono">${fmt.format(t.exitPrice)}</td>
-                    <td class="font-mono font-bold ${t.profitRate >= 0 ? 'text-emerald-400' : 'text-rose-400'}">${t.profitRate > 0 ? '+' : ''}${t.profitRate.toFixed(2)}%</td>
-                    <td><span class="badge ${t.profitRate >= 0 ? 'badge-success' : 'badge-error'} badge-xs font-bold">${t.profitRate >= 0 ? '수익' : '손실'}</span></td>
-                </tr>
-            `).join('');
+            logEl.innerHTML = trades.reverse().map(t => `<tr class="hover:bg-slate-700/30 border-b border-slate-700/50 transition-colors text-xs"><td class="text-[10px] text-slate-400 font-mono">${t.entryTime.replace('T', ' ')}</td><td class="font-mono">${fmt.format(t.entryPrice)}</td><td class="font-mono">${fmt.format(t.exitPrice)}</td><td class="font-mono font-bold ${t.profitRate >= 0 ? 'text-emerald-400' : 'text-rose-400'}">${t.profitRate > 0 ? '+' : ''}${t.profitRate.toFixed(2)}%</td><td><span class="badge ${t.profitRate >= 0 ? 'badge-success' : 'badge-error'} badge-xs font-bold">${t.profitRate >= 0 ? '수익' : '손실'}</span></td></tr>`).join('');
         }
 
         async function init() {
@@ -571,46 +295,19 @@
             try {
                 const response = await fetch('https://api.upbit.com/v1/market/all');
                 const data = await response.json();
-                state.markets = data.filter(m => m.market.startsWith('KRW-')).map(m => ({
-                    id: m.market,
-                    name: m.korean_name,
-                    symbol: m.market.split('-')[1]
-                }));
-                renderMarketOptions();
+                state.markets = data.filter(m => m.market.startsWith('KRW-')).map(m => ({ id: m.market, name: m.korean_name, symbol: m.market.split('-')[1] }));
+                const select = document.getElementById('marketSelect');
+                state.markets.forEach(m => { const opt = document.createElement('option'); opt.value = m.id; opt.innerText = `${m.name} (${m.symbol})`; if (m.id === 'KRW-BTC') opt.selected = true; select.appendChild(opt); });
                 updatePreviewChart();
             } catch (e) { console.error(e); }
-            
             document.getElementById('marketSearch').addEventListener('input', (e) => {
-                renderMarketOptions(e.target.value);
+                const filter = e.target.value.toLowerCase(), select = document.getElementById('marketSelect');
+                select.innerHTML = '';
+                state.markets.filter(m => m.name.includes(filter) || m.symbol.toLowerCase().includes(filter)).forEach(m => { const opt = document.createElement('option'); opt.value = m.id; opt.innerText = `${m.name} (${m.symbol})`; select.appendChild(opt); });
             });
             document.getElementById('marketSelect').addEventListener('change', updatePreviewChart);
             document.getElementById('timeframeSelect').addEventListener('change', updatePreviewChart);
-        }
-
-        function renderMarketOptions(filter = '') {
-            const select = document.getElementById('marketSelect');
-            const currentVal = select.value;
-            select.innerHTML = '';
-            
-            const filtered = state.markets.filter(m => 
-                m.name.includes(filter) || 
-                m.symbol.toLowerCase().includes(filter.toLowerCase())
-            );
-
-            filtered.forEach(m => {
-                const opt = document.createElement('option');
-                opt.value = m.id;
-                opt.innerText = `${m.name} (${m.symbol})`;
-                if (m.id === currentVal || (filter === '' && m.id === 'KRW-BTC')) opt.selected = true;
-                select.appendChild(opt);
-            });
-
-            if (filtered.length === 0) {
-                const opt = document.createElement('option');
-                opt.disabled = true;
-                opt.innerText = "검색 결과 없음";
-                select.appendChild(opt);
-            }
+            Object.entries(state.indicatorSettings).forEach(([k, v]) => { const el = document.getElementById(`check_${k}`); if (el) el.checked = v; });
         }
         init();
     </script>
