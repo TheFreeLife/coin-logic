@@ -15,6 +15,7 @@
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: #1e293b; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+        .chart-fullscreen { position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100vh !important; z-index: 9999 !important; background: #0f172a !important; margin: 0 !important; border: none !important; border-radius: 0 !important; }
     </style>
 </head>
 <body class="text-slate-200 min-h-screen">
@@ -80,6 +81,7 @@
                         <div class="flex items-center gap-4">
                             <div class="text-[10px] text-slate-500 font-mono" id="chartInfo">로드 대기 중</div>
                             <button onclick="indicator_modal.showModal()" class="btn btn-xs btn-ghost border border-slate-700 hover:bg-slate-700 h-7 px-2"><i data-lucide="layers" class="w-3 h-3 text-slate-400 mr-1"></i>지표 설정</button>
+                            <button onclick="toggleFullscreen()" class="btn btn-xs btn-ghost btn-square border border-slate-700"><i id="fullscreenIcon" data-lucide="maximize" class="w-3 h-3 text-slate-400"></i></button>
                         </div>
                     </div>
                     <div id="statsChart" class="w-full h-[450px]"></div>
@@ -106,16 +108,21 @@
     </div>
 
     <dialog id="indicator_modal" class="modal">
-        <div class="modal-box bg-slate-800 border border-slate-700 max-w-sm">
-            <h3 class="font-bold text-lg mb-4 flex items-center gap-2"><i data-lucide="layers" class="w-5 h-5 text-primary"></i>지표 설정</h3>
-            <div class="space-y-4">
-                <div class="form-control"><label class="label cursor-pointer justify-start gap-4"><input type="checkbox" class="checkbox checkbox-primary" id="check_volume" onchange="toggleIndicator('volume', this.checked)"><span class="label-text">거래량 (Volume)</span></label></div>
-                <div class="form-control"><label class="label cursor-pointer justify-start gap-4"><input type="checkbox" class="checkbox checkbox-primary" id="check_ma5" onchange="toggleIndicator('ma5', this.checked)"><span class="label-text">MA5</span></label></div>
-                <div class="form-control"><label class="label cursor-pointer justify-start gap-4"><input type="checkbox" class="checkbox checkbox-primary" id="check_ma20" onchange="toggleIndicator('ma20', this.checked)"><span class="label-text">MA20</span></label></div>
-                <div class="form-control"><label class="label cursor-pointer justify-start gap-4"><input type="checkbox" class="checkbox checkbox-primary" id="check_ma60" onchange="toggleIndicator('ma60', this.checked)"><span class="label-text">MA60</span></label></div>
-                <div class="form-control"><label class="label cursor-pointer justify-start gap-4"><input type="checkbox" class="checkbox checkbox-primary" id="check_rsi" onchange="toggleIndicator('rsi', this.checked)"><span class="label-text">RSI</span></label></div>
+        <div class="modal-box bg-slate-800 border border-slate-700 max-sm p-0 overflow-hidden">
+            <div class="p-6 border-b border-slate-700 bg-slate-800/50 flex justify-between items-center">
+                <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="layers" class="w-5 h-5 text-primary"></i>보조지표 설정</h3>
+                <form method="dialog"><button class="btn btn-sm btn-ghost btn-circle">✕</button></form>
             </div>
-            <div class="modal-action"><form method="dialog"><button class="btn btn-sm btn-primary">닫기</button></form></div>
+            <div class="p-4 space-y-1">
+                <div class="flex items-center justify-between p-2 hover:bg-slate-700/30 rounded-lg transition-colors"><label class="flex items-center gap-3 cursor-pointer flex-1"><input type="checkbox" class="checkbox checkbox-sm checkbox-primary" id="check_volume" onchange="toggleIndicator('volume', this.checked)"><span class="font-bold text-sm">거래량 (Volume)</span></label></div>
+                <div class="divider my-1 opacity-50"></div>
+                <div class="space-y-2 p-2 hover:bg-slate-700/30 rounded-lg transition-colors group"><div class="flex items-center justify-between"><label class="flex items-center gap-3 cursor-pointer flex-1"><input type="checkbox" class="checkbox checkbox-sm checkbox-primary" id="check_ma5" onchange="toggleIndicator('ma5', this.checked)"><span class="text-sm">이동평균선 (단기)</span></label><button onclick="toggleConfig('ma5')" class="btn btn-ghost btn-xs btn-square text-slate-500 hover:text-primary"><i data-lucide="settings-2" class="w-3.5 h-3.5"></i></button></div><div id="config_ma5" class="hidden pl-8 pr-2 pb-2"><div class="flex items-center justify-between bg-slate-900/50 p-2 rounded-md border border-slate-700"><span class="text-[11px] text-slate-400">평균 기간</span><input type="number" id="input_ma5_p" class="input input-xs bg-slate-800 border-slate-600 w-16 text-right font-mono" onchange="updateIndicatorParam('ma5_p', this.value)"></div></div></div>
+                <div class="space-y-2 p-2 hover:bg-slate-700/30 rounded-lg transition-colors group"><div class="flex items-center justify-between"><label class="flex items-center gap-3 cursor-pointer flex-1"><input type="checkbox" class="checkbox checkbox-sm checkbox-primary" id="check_ma20" onchange="toggleIndicator('ma20', this.checked)"><span class="text-sm">이동평균선 (중기)</span></label><button onclick="toggleConfig('ma20')" class="btn btn-ghost btn-xs btn-square text-slate-500 hover:text-primary"><i data-lucide="settings-2" class="w-3.5 h-3.5"></i></button></div><div id="config_ma20" class="hidden pl-8 pr-2 pb-2"><div class="flex items-center justify-between bg-slate-900/50 p-2 rounded-md border border-slate-700"><span class="text-[11px] text-slate-400">평균 기간</span><input type="number" id="input_ma20_p" class="input input-xs bg-slate-800 border-slate-600 w-16 text-right font-mono" onchange="updateIndicatorParam('ma20_p', this.value)"></div></div></div>
+                <div class="space-y-2 p-2 hover:bg-slate-700/30 rounded-lg transition-colors group"><div class="flex items-center justify-between"><label class="flex items-center gap-3 cursor-pointer flex-1"><input type="checkbox" class="checkbox checkbox-sm checkbox-primary" id="check_ma60" onchange="toggleIndicator('ma60', this.checked)"><span class="text-sm">이동평균선 (장기)</span></label><button onclick="toggleConfig('ma60')" class="btn btn-ghost btn-xs btn-square text-slate-500 hover:text-primary"><i data-lucide="settings-2" class="w-3.5 h-3.5"></i></button></div><div id="config_ma60" class="hidden pl-8 pr-2 pb-2"><div class="flex items-center justify-between bg-slate-900/50 p-2 rounded-md border border-slate-700"><span class="text-[11px] text-slate-400">평균 기간</span><input type="number" id="input_ma60_p" class="input input-xs bg-slate-800 border-slate-600 w-16 text-right font-mono" onchange="updateIndicatorParam('ma60_p', this.value)"></div></div></div>
+                <div class="divider my-1 opacity-50"></div>
+                <div class="space-y-2 p-2 hover:bg-slate-700/30 rounded-lg transition-colors group"><div class="flex items-center justify-between"><label class="flex items-center gap-3 cursor-pointer flex-1"><input type="checkbox" class="checkbox checkbox-sm checkbox-primary" id="check_rsi" onchange="toggleIndicator('rsi', this.checked)"><span class="text-sm font-bold">RSI</span></label><button onclick="toggleConfig('rsi')" class="btn btn-ghost btn-xs btn-square text-slate-500 hover:text-primary"><i data-lucide="settings-2" class="w-3.5 h-3.5"></i></button></div><div id="config_rsi" class="hidden pl-8 pr-2 pb-2"><div class="flex items-center justify-between bg-slate-900/50 p-2 rounded-md border border-slate-700"><span class="text-[11px] text-slate-400">산출 기간</span><input type="number" id="input_rsi_p" class="input input-xs bg-slate-800 border-slate-600 w-16 text-right font-mono" onchange="updateIndicatorParam('rsi_p', this.value)"></div></div></div>
+            </div>
+            <div class="p-4 bg-slate-800/50 border-t border-slate-700 flex justify-end"><form method="dialog"><button class="btn btn-sm btn-primary px-6">완료</button></form></div>
         </div>
     </dialog>
 
@@ -123,10 +130,13 @@
         const state = {
             markets: [], candles: [], isSimulating: false, chart: null, series: null,
             isLoadingHistory: false, isHistoryEnded: false, conditionId: 0,
-            indicatorSettings: JSON.parse(localStorage.getItem('indicatorSettings')) || { volume: true, ma5: true, ma20: true, ma60: false, rsi: false },
+            indicatorSettings: JSON.parse(localStorage.getItem('indicatorSettings')) || { volume: true, ma5: true, ma5_p: 5, ma20: true, ma20_p: 20, ma60: false, ma60_p: 60, rsi: false, rsi_p: 14 },
             indicatorSeries: {}
         };
         const fmt = new Intl.NumberFormat('ko-KR');
+        const tooltip = document.createElement('div');
+        tooltip.className = 'fixed hidden z-50 p-3 bg-slate-900/95 border border-slate-700 rounded-xl shadow-2xl pointer-events-none text-[11px] font-mono leading-relaxed min-w-[140px] backdrop-blur-sm';
+        document.body.appendChild(tooltip);
 
         function initChart() {
             const container = document.getElementById('statsChart');
@@ -135,19 +145,31 @@
                 layout: { background: { type: 'solid', color: 'transparent' }, textColor: '#94a3b8' },
                 grid: { vertLines: { color: '#1e293b' }, horzLines: { color: '#1e293b' } },
                 rightPriceScale: { borderColor: '#1e293b', autoScale: true },
-                timeScale: { borderColor: '#1e293b', timeVisible: true },
+                timeScale: { borderColor: '#1e293b', timeVisible: true, tickMarkFormatter: (time) => { const date = new Date(time * 1000); return `${date.getMonth() + 1}/${date.getDate()}`; } },
+                localization: { locale: 'ko-KR', priceFormatter: val => fmt.format(val), dateFormat: 'yyyy-MM-dd' },
+                handleScroll: true, handleScale: true,
             });
             state.series = state.chart.addCandlestickSeries({ upColor: '#10b981', downColor: '#ef4444', borderVisible: false, wickUpColor: '#10b981', wickDownColor: '#ef4444' });
             state.chart.timeScale().subscribeVisibleLogicalRangeChange(range => { if (range && range.from < 10) fetchHistory(); });
-            new ResizeObserver(entries => { for (let entry of entries) if (state.chart) state.chart.applyOptions({ width: entry.contentRect.width }); }).observe(container);
+            state.chart.subscribeCrosshairMove(param => {
+                if (param && param.time && param.point) {
+                    const d = param.seriesData.get(state.series);
+                    if (d) {
+                        tooltip.style.display = 'block'; const diff = d.close - d.open, diffRate = (diff / d.open * 100).toFixed(2), hDiff = ((d.high - d.open) / d.open * 100).toFixed(2), lDiff = ((d.low - d.open) / d.open * 100).toFixed(2);
+                        tooltip.innerHTML = `<div class="flex flex-col gap-1"><div class="text-slate-500 mb-1 border-b border-slate-800 pb-1 text-[10px]">${new Date(param.time * 1000).toLocaleString()}</div><div class="flex justify-between gap-6"><span>O</span><span class="text-slate-200">${fmt.format(d.open)}</span></div><div class="flex justify-between gap-6"><span>H</span><div class="flex gap-1.5 items-baseline"><span class="text-emerald-400 font-medium">${fmt.format(d.high)}</span><span class="text-emerald-400 text-[10px] font-medium">(+${hDiff}%)</span></div></div><div class="flex justify-between gap-6"><span>L</span><div class="flex gap-1.5 items-baseline"><span class="text-rose-400 font-medium">${fmt.format(d.low)}</span><span class="text-rose-400 text-[10px] font-medium">(${lDiff}%)</span></div></div><div class="flex justify-between gap-6"><span>C</span><span class="text-slate-200">${fmt.format(d.close)}</span></div><div class="flex justify-between gap-6 mt-1 border-t border-slate-800 pt-1 font-medium ${diff >= 0 ? 'text-emerald-400' : 'text-rose-400'}"><span>${diff >= 0 ? '▲' : '▼'}</span><span>${fmt.format(Math.abs(diff))} (${diffRate}%)</span></div></div>`;
+                        const rect = container.getBoundingClientRect(); let x = param.point.x + rect.left + 15, y = param.point.y + rect.top - 160 - 15;
+                        if (x + 180 > window.innerWidth) x = param.point.x + rect.left - 180 - 15;
+                        if (y < 10) y = param.point.y + rect.top + 15;
+                        tooltip.style.left = x + 'px'; tooltip.style.top = y + 'px';
+                    } else tooltip.style.display = 'none';
+                } else tooltip.style.display = 'none';
+            });
+            new ResizeObserver(entries => { for (let entry of entries) if (state.chart) { state.chart.applyOptions({ width: entry.contentRect.width, height: entry.contentRect.height }); setTimeout(() => state.chart.timeScale().fitContent(), 0); } }).observe(container);
         }
 
         async function fetchHistory() {
             if (state.isLoadingHistory || state.isHistoryEnded || state.candles.length === 0) return;
-            state.isLoadingHistory = true;
-            const market = document.getElementById('marketSelect').value;
-            const timeframe = document.getElementById('timeframeSelect').value;
-            const firstTime = state.candles[0].time;
+            state.isLoadingHistory = true; const market = document.getElementById('marketSelect').value, timeframe = document.getElementById('timeframeSelect').value, firstTime = state.candles[0].time;
             try {
                 const response = await fetch(`https://api.upbit.com/v1/candles/${timeframe}?market=${market}&count=200&to=${new Date(firstTime * 1000).toISOString()}`);
                 const data = await response.json();
@@ -156,9 +178,7 @@
                 const newHistory = history.filter(h => h.time < firstTime);
                 if (newHistory.length === 0) { state.isHistoryEnded = true; return; }
                 const timeScale = state.chart.timeScale(), currentRange = timeScale.getVisibleLogicalRange(), addedCount = newHistory.length;
-                state.candles = [...newHistory, ...state.candles];
-                state.series.setData(state.candles);
-                renderIndicators();
+                state.candles = [...newHistory, ...state.candles]; state.series.setData(state.candles); renderIndicators();
                 if (currentRange) timeScale.setVisibleLogicalRange({ from: currentRange.from + addedCount, to: currentRange.to + addedCount });
                 document.getElementById('chartInfo').innerText = `총 ${state.candles.length.toLocaleString()}개의 캔들 로드됨`;
             } catch (e) { console.error(e); } finally { state.isLoadingHistory = false; }
@@ -171,10 +191,7 @@
                 const response = await fetch(`https://api.upbit.com/v1/candles/${timeframe}?market=${market}&count=200`);
                 const data = await response.json();
                 state.candles = data.map(c => ({ time: Math.floor(new Date(c.candle_date_time_kst).getTime() / 1000), open: c.opening_price, high: c.high_price, low: c.low_price, close: c.trade_price, volume: c.candle_acc_trade_volume, raw_time: c.candle_date_time_kst })).sort((a, b) => a.time - b.time);
-                state.series.setData(state.candles);
-                state.chart.timeScale().fitContent();
-                state.series.setMarkers([]); state.isHistoryEnded = false;
-                renderIndicators();
+                state.series.setData(state.candles); state.chart.timeScale().fitContent(); state.series.setMarkers([]); state.isHistoryEnded = false; renderIndicators();
                 document.getElementById('chartInfo').innerText = `총 ${state.candles.length.toLocaleString()}개의 캔들 로드됨`;
             } catch (e) { console.error(e); }
         }
@@ -183,40 +200,47 @@
             let allCandles = [], lastTime = null; const chunks = Math.ceil(targetCount / 200);
             for (let i = 0; i < chunks; i++) {
                 const response = await fetch(`https://api.upbit.com/v1/candles/${timeframe}?market=${market}&count=200${lastTime ? '&to=' + lastTime : ''}`);
-                const data = await response.json();
-                if (!data || data.length === 0) break;
+                const data = await response.json(); if (!data || data.length === 0) break;
                 const chunk = data.map(c => ({ time: Math.floor(new Date(c.candle_date_time_kst).getTime() / 1000), open: c.opening_price, high: c.high_price, low: c.low_price, close: c.trade_price, volume: c.candle_acc_trade_volume, raw_time: c.candle_date_time_kst }));
-                allCandles = [...chunk.reverse(), ...allCandles];
-                lastTime = data[data.length - 1].candle_date_time_kst;
+                allCandles = [...chunk.reverse(), ...allCandles]; lastTime = data[data.length - 1].candle_date_time_kst;
                 document.getElementById('simStatus').innerText = `수집 중 (${Math.round(((i + 1) / chunks) * 100)}%)`;
                 await new Promise(r => setTimeout(r, 50));
             }
             return allCandles.sort((a, b) => a.time - b.time);
         }
 
-        function calculateMA(data, p) { return data.map((_, i) => i < p - 1 ? null : { time: data[i].time, value: data.slice(i - p + 1, i + 1).reduce((acc, c) => acc + c.close, 0) / p }).filter(v => v !== null); }
+        function calculateMA(data, p) { p = parseInt(p); return data.map((_, i) => i < p - 1 ? null : { time: data[i].time, value: data.slice(i - p + 1, i + 1).reduce((acc, c) => acc + c.close, 0) / p }).filter(v => v !== null); }
         function calculateRSI(data, p = 14) {
-            let g = [], l = []; for (let i = 1; i < data.length; i++) { let d = data[i].close - data[i-1].close; g.push(Math.max(0, d)); l.push(Math.max(0, -d)); }
+            p = parseInt(p); let g = [], l = []; for (let i = 1; i < data.length; i++) { let d = data[i].close - data[i-1].close; g.push(Math.max(0, d)); l.push(Math.max(0, -d)); }
             let ag = g.slice(0, p).reduce((a, b) => a + b, 0) / p, al = l.slice(0, p).reduce((a, b) => a + b, 0) / p, r = [];
             for (let i = p; i < data.length; i++) { ag = (ag * (p - 1) + g[i-1]) / p; al = (al * (p - 1) + l[i-1]) / p; r.push({ time: data[i].time, value: 100 - (100 / (1 + (ag / al))) }); }
             return r;
         }
 
         function toggleIndicator(k, c) { state.indicatorSettings[k] = c; localStorage.setItem('indicatorSettings', JSON.stringify(state.indicatorSettings)); renderIndicators(); }
+        function updateIndicatorParam(k, v) { state.indicatorSettings[k] = v; localStorage.setItem('indicatorSettings', JSON.stringify(state.indicatorSettings)); renderIndicators(); }
+        function toggleConfig(k) { const el = document.getElementById(`config_${k}`); if (el) { const isH = el.classList.contains('hidden'); document.querySelectorAll('[id^="config_"]').forEach(c => c.classList.add('hidden')); if (isH) el.classList.remove('hidden'); } }
+        
         function renderIndicators() {
             if (!state.chart || state.candles.length === 0) return;
             Object.values(state.indicatorSeries).forEach(s => { if (s) try { state.chart.removeSeries(s); } catch(e) {} }); state.indicatorSeries = {};
-            if (state.indicatorSettings.volume) {
-                const s = state.chart.addHistogramSeries({ color: '#26a69a', priceFormat: { type: 'volume' }, priceScaleId: 'volume' });
-                s.setData(state.candles.map(c => ({ time: c.time, value: c.volume, color: c.close >= c.open ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)' })));
-                state.chart.priceScale('volume').applyOptions({ scaleMargins: { top: 0.8, bottom: 0 } }); state.indicatorSeries.volume = s;
-            }
-            const maC = { ma5: { p: 5, c: '#f59e0b' }, ma20: { p: 20, c: '#3b82f6' }, ma60: { p: 60, c: '#a855f7' } };
+            if (state.indicatorSettings.volume) { const s = state.chart.addHistogramSeries({ color: '#26a69a', priceFormat: { type: 'volume' }, priceScaleId: 'volume' }); s.setData(state.candles.map(c => ({ time: c.time, value: c.volume, color: c.close >= c.open ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)' }))); state.chart.priceScale('volume').applyOptions({ scaleMargins: { top: 0.8, bottom: 0 } }); state.indicatorSeries.volume = s; }
+            const maC = { ma5: { p: state.indicatorSettings.ma5_p, c: '#f59e0b' }, ma20: { p: state.indicatorSettings.ma20_p, c: '#3b82f6' }, ma60: { p: state.indicatorSettings.ma60_p, c: '#a855f7' } };
             Object.entries(maC).forEach(([k, v]) => { if (state.indicatorSettings[k]) { const s = state.chart.addLineSeries({ color: v.c, lineWidth: 1, crosshairMarkerVisible: false, priceLineVisible: false }); s.setData(calculateMA(state.candles, v.p)); state.indicatorSeries[k] = s; } });
-            if (state.indicatorSettings.rsi) {
-                const s = state.chart.addLineSeries({ color: '#ec4899', lineWidth: 1, priceScaleId: 'rsi', title: 'RSI' });
-                s.setData(calculateRSI(state.candles)); state.chart.priceScale('rsi').applyOptions({ scaleMargins: { top: 0.1, bottom: 0.7 } }); state.indicatorSeries.rsi = s;
-            }
+            if (state.indicatorSettings.rsi) { const s = state.chart.addLineSeries({ color: '#ec4899', lineWidth: 1, priceScaleId: 'rsi', title: 'RSI' }); s.setData(calculateRSI(state.candles, state.indicatorSettings.rsi_p)); state.chart.priceScale('rsi').applyOptions({ scaleMargins: { top: 0.1, bottom: 0.7 } }); state.indicatorSeries.rsi = s; }
+        }
+
+        function syncIndicatorUI() {
+            Object.entries(state.indicatorSettings).forEach(([k, v]) => {
+                const chk = document.getElementById(`check_${k}`); if (chk) chk.checked = v;
+                const inp = document.getElementById(`input_${k}`); if (inp) inp.value = v;
+            });
+        }
+
+        function toggleFullscreen() {
+            const card = document.querySelector('#statsChart').closest('.card'), icon = document.getElementById('fullscreenIcon'), isF = card.classList.toggle('chart-fullscreen');
+            icon.setAttribute('data-lucide', isF ? 'minimize' : 'maximize'); lucide.createIcons();
+            setTimeout(() => { if (state.chart) state.chart.applyOptions({ width: document.getElementById('statsChart').clientWidth, height: isF ? window.innerHeight - 60 : 450 }); }, 100);
         }
 
         function addCondition() {
@@ -237,36 +261,29 @@
 
         document.getElementById('runSimBtn').addEventListener('click', async () => {
             if (state.isSimulating) return;
-            const market = document.getElementById('marketSelect').value, timeframe = document.getElementById('timeframeSelect').value;
-            const tp = parseFloat(document.getElementById('takeProfit').value) / 100, sl = parseFloat(document.getElementById('stopLoss').value) / 100;
-            const conditionEls = document.querySelectorAll('#conditionsContainer > div');
+            const market = document.getElementById('marketSelect').value, timeframe = document.getElementById('timeframeSelect').value, tp = parseFloat(document.getElementById('takeProfit').value) / 100, sl = parseFloat(document.getElementById('stopLoss').value) / 100, conditionEls = document.querySelectorAll('#conditionsContainer > div');
             if (conditionEls.length === 0) { alert("매수 조건을 추가하세요."); return; }
-            const activeConditions = Array.from(conditionEls).map(el => {
-                const id = el.id.split('-')[1], type = document.getElementById(`cond-params-${id}`).getAttribute('data-type'), params = { type };
-                el.querySelectorAll('input, select').forEach(input => { const key = input.className.match(/param-([\w-]+)/)?.[1]; if (key) params[key] = input.value; });
-                return params;
-            });
-            state.isSimulating = true; document.getElementById('runSimBtn').innerText = "데이터 수집 중...";
+            const activeConditions = Array.from(conditionEls).map(el => { const id = el.id.split('-')[1], type = document.getElementById(`cond-params-${id}`).getAttribute('data-type'), params = { type }; el.querySelectorAll('input, select').forEach(input => { const key = input.className.match(/param-([\w-]+)/)?.[1]; if (key) params[key] = input.value; }); return params; });
+            state.isSimulating = true; document.getElementById('runSimBtn').innerText = "수집 중...";
             try {
-                const candles = await fetchLargeData(market, timeframe, 10000); state.candles = candles;
-                document.getElementById('simStatus').innerText = "분석 중...";
+                const candles = await fetchLargeData(market, timeframe, 10000); state.candles = candles; document.getElementById('simStatus').innerText = "분석 중...";
                 const indicators = {};
                 activeConditions.forEach((cond, idx) => {
                     const key = `${cond.type}_${idx}`;
-                    if (cond.type === 'rsi') indicators[key] = calculateRSI(candles, parseInt(cond.period)).map(v => v.value);
-                    if (cond.type === 'ma_cross') { indicators[`${key}_short`] = calculateMA(candles, parseInt(cond.short)).map(v => v.value); indicators[`${key}_long`] = calculateMA(candles, parseInt(cond.long)).map(v => v.value); }
-                    if (cond.type === 'ma_price') indicators[key] = calculateMA(candles, parseInt(cond.period)).map(v => v.value);
+                    if (cond.type === 'rsi') indicators[key] = calculateRSI(candles, parseInt(cond.period)).reduce((acc, v) => { acc[v.time] = v.value; return acc; }, {});
+                    if (cond.type === 'ma_cross') { indicators[`${key}_short`] = calculateMA(candles, parseInt(cond.short)).reduce((acc, v) => { acc[v.time] = v.value; return acc; }, {}); indicators[`${key}_long`] = calculateMA(candles, parseInt(cond.long)).reduce((acc, v) => { acc[v.time] = v.value; return acc; }, {}); }
+                    if (cond.type === 'ma_price') indicators[key] = calculateMA(candles, parseInt(cond.period)).reduce((acc, v) => { acc[v.time] = v.value; return acc; }, {});
                 });
                 let trades = [], activeTrade = null;
-                for (let i = 60; i < candles.length; i++) {
-                    const cur = candles[i];
+                for (let i = 100; i < candles.length; i++) {
+                    const cur = candles[i], prev = candles[i-1];
                     if (!activeTrade) {
                         if (activeConditions.every((cond, idx) => {
                             const key = `${cond.type}_${idx}`;
-                            if (cond.type === 'rsi') { const v = indicators[key][i - parseInt(cond.period)]; if (!v) return false; if (cond.op === 'under') return v <= parseFloat(cond.val); if (cond.op === 'over') return v >= parseFloat(cond.val); if (cond.op === 'cross_up') return indicators[key][i-1-parseInt(cond.period)] < parseFloat(cond.val) && v >= parseFloat(cond.val); }
-                            if (cond.type === 'ma_cross') { const s = indicators[`${key}_short`][i-parseInt(cond.short)], l = indicators[`${key}_long`][i-parseInt(cond.long)]; if (!s || !l) return false; if (cond.op === 'golden') return indicators[`${key}_short`][i-1-parseInt(cond.short)] <= indicators[`${key}_long`][i-1-parseInt(cond.long)] && s > l; if (cond.op === 'dead') return indicators[`${key}_short`][i-1-parseInt(cond.short)] >= indicators[`${key}_long`][i-1-parseInt(cond.long)] && s < l; }
-                            if (cond.type === 'ma_price') { const ma = indicators[key][i-parseInt(cond.period)]; if (!ma) return false; return cond.op === 'above' ? cur.close > ma : cur.close < ma; }
-                            if (cond.type === 'price_change') { const prev = candles[i - parseInt(cond.period)]; if (!prev) return false; const chg = (cur.close - prev.close) / prev.close * 100; return cond.op === 'down' ? chg <= -parseFloat(cond.val) : chg >= parseFloat(cond.val); }
+                            if (cond.type === 'rsi') { const v = indicators[key][cur.time], pv = indicators[key][prev.time]; if (!v) return false; if (cond.op === 'under') return v <= parseFloat(cond.val); if (cond.op === 'over') return v >= parseFloat(cond.val); if (cond.op === 'cross_up') return pv < parseFloat(cond.val) && v >= parseFloat(cond.val); }
+                            if (cond.type === 'ma_cross') { const s = indicators[`${key}_short`][cur.time], l = indicators[`${key}_long`][cur.time], ps = indicators[`${key}_short`][prev.time], pl = indicators[`${key}_long`][prev.time]; if (!s || !l || !ps || !pl) return false; return cond.op === 'golden' ? (ps <= pl && s > l) : (ps >= pl && s < l); }
+                            if (cond.type === 'ma_price') { const ma = indicators[key][cur.time]; if (!ma) return false; return cond.op === 'above' ? cur.close > ma : cur.close < ma; }
+                            if (cond.type === 'price_change') { const pCandle = candles[i - parseInt(cond.period)]; if (!pCandle) return false; const chg = (cur.close - pCandle.close) / pCandle.close * 100; return cond.op === 'down' ? chg <= -parseFloat(cond.val) : chg >= parseFloat(cond.val); }
                             return false;
                         })) activeTrade = { entryPrice: cur.close, entryTime: cur.raw_time };
                     } else {
@@ -295,19 +312,21 @@
             try {
                 const response = await fetch('https://api.upbit.com/v1/market/all');
                 const data = await response.json();
-                state.markets = data.filter(m => m.market.startsWith('KRW-')).map(m => ({ id: m.market, name: m.korean_name, symbol: m.market.split('-')[1] }));
-                const select = document.getElementById('marketSelect');
-                state.markets.forEach(m => { const opt = document.createElement('option'); opt.value = m.id; opt.innerText = `${m.name} (${m.symbol})`; if (m.id === 'KRW-BTC') opt.selected = true; select.appendChild(opt); });
-                updatePreviewChart();
+                state.markets = data.filter(m => m.market.startsWith('KRW-'))
+                    .map(m => ({ id: m.market, name: m.korean_name, symbol: m.market.split('-')[1] }))
+                    .sort((a, b) => a.name.localeCompare(b.name, 'ko'));
+                renderMarketOptions(); await updatePreviewChart();
             } catch (e) { console.error(e); }
-            document.getElementById('marketSearch').addEventListener('input', (e) => {
-                const filter = e.target.value.toLowerCase(), select = document.getElementById('marketSelect');
-                select.innerHTML = '';
-                state.markets.filter(m => m.name.includes(filter) || m.symbol.toLowerCase().includes(filter)).forEach(m => { const opt = document.createElement('option'); opt.value = m.id; opt.innerText = `${m.name} (${m.symbol})`; select.appendChild(opt); });
-            });
+            document.getElementById('marketSearch').addEventListener('input', (e) => renderMarketOptions(e.target.value));
             document.getElementById('marketSelect').addEventListener('change', updatePreviewChart);
             document.getElementById('timeframeSelect').addEventListener('change', updatePreviewChart);
-            Object.entries(state.indicatorSettings).forEach(([k, v]) => { const el = document.getElementById(`check_${k}`); if (el) el.checked = v; });
+            syncIndicatorUI();
+        }
+        function renderMarketOptions(filter = '') {
+            const select = document.getElementById('marketSelect'); const currentVal = select.value; select.innerHTML = '';
+            const filtered = state.markets.filter(m => m.name.includes(filter) || m.symbol.toLowerCase().includes(filter.toLowerCase()));
+            filtered.forEach(m => { const opt = document.createElement('option'); opt.value = m.id; opt.innerText = `${m.name} (${m.symbol})`; if (m.id === currentVal || (filter === '' && m.id === 'KRW-BTC')) opt.selected = true; select.appendChild(opt); });
+            if (filtered.length === 0) { const opt = document.createElement('option'); opt.disabled = true; opt.innerText = "검색 결과 없음"; select.appendChild(opt); }
         }
         init();
     </script>
