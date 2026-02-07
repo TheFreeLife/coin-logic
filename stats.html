@@ -145,8 +145,29 @@
                 layout: { background: { type: 'solid', color: 'transparent' }, textColor: '#94a3b8' },
                 grid: { vertLines: { color: '#1e293b' }, horzLines: { color: '#1e293b' } },
                 rightPriceScale: { borderColor: '#1e293b', autoScale: true },
-                timeScale: { borderColor: '#1e293b', timeVisible: true, tickMarkFormatter: (time) => { const date = new Date(time * 1000); return `${date.getMonth() + 1}/${date.getDate()}`; } },
-                localization: { locale: 'ko-KR', priceFormatter: val => fmt.format(val), dateFormat: 'yyyy-MM-dd' },
+                timeScale: { 
+                    borderColor: '#1e293b', 
+                    timeVisible: true, 
+                    tickMarkFormatter: (time, tickMarkType, locale) => { 
+                        const date = new Date(time * 1000); 
+                        switch(tickMarkType) {
+                            case 0: return `${date.getFullYear()}년`;
+                            case 1: return `${date.getMonth() + 1}월`;
+                            case 2: return `${date.getDate()}일`;
+                            case 3: return `${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}`;
+                            default: return `${date.getMonth() + 1}/${date.getDate()}`;
+                        }
+                    } 
+                },
+                localization: { 
+                    locale: 'ko-KR', 
+                    priceFormatter: val => fmt.format(val), 
+                    dateFormat: 'yyyy-MM-dd',
+                    timeFormatter: (time) => {
+                        const date = new Date(time * 1000);
+                        return `${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}:${String(date.getSeconds()).padStart(2, '0')}`;
+                    }
+                },
                 handleScroll: true, handleScale: true,
             });
             state.series = state.chart.addCandlestickSeries({ upColor: '#10b981', downColor: '#ef4444', borderVisible: false, wickUpColor: '#10b981', wickDownColor: '#ef4444' });
@@ -174,7 +195,7 @@
                 const response = await fetch(`https://api.upbit.com/v1/candles/${timeframe}?market=${market}&count=200&to=${new Date(firstTime * 1000).toISOString()}`);
                 const data = await response.json();
                 if (data.length === 0) { state.isHistoryEnded = true; return; }
-                const history = data.map(c => ({ time: Math.floor(new Date(c.candle_date_time_kst).getTime() / 1000), open: c.opening_price, high: c.high_price, low: c.low_price, close: c.trade_price, volume: c.candle_acc_trade_volume, raw_time: c.candle_date_time_kst })).sort((a, b) => a.time - b.time);
+                const history = data.map(c => ({ time: Math.floor(new Date(c.candle_date_time_kst + "+09:00").getTime() / 1000), open: c.opening_price, high: c.high_price, low: c.low_price, close: c.trade_price, volume: c.candle_acc_trade_volume, raw_time: c.candle_date_time_kst })).sort((a, b) => a.time - b.time);
                 const newHistory = history.filter(h => h.time < firstTime);
                 if (newHistory.length === 0) { state.isHistoryEnded = true; return; }
                 const timeScale = state.chart.timeScale(), currentRange = timeScale.getVisibleLogicalRange(), addedCount = newHistory.length;
@@ -190,7 +211,7 @@
             try {
                 const response = await fetch(`https://api.upbit.com/v1/candles/${timeframe}?market=${market}&count=200`);
                 const data = await response.json();
-                state.candles = data.map(c => ({ time: Math.floor(new Date(c.candle_date_time_kst).getTime() / 1000), open: c.opening_price, high: c.high_price, low: c.low_price, close: c.trade_price, volume: c.candle_acc_trade_volume, raw_time: c.candle_date_time_kst })).sort((a, b) => a.time - b.time);
+                state.candles = data.map(c => ({ time: Math.floor(new Date(c.candle_date_time_kst + "+09:00").getTime() / 1000), open: c.opening_price, high: c.high_price, low: c.low_price, close: c.trade_price, volume: c.candle_acc_trade_volume, raw_time: c.candle_date_time_kst })).sort((a, b) => a.time - b.time);
                 state.series.setData(state.candles); state.chart.timeScale().fitContent(); state.series.setMarkers([]); state.isHistoryEnded = false; renderIndicators();
                 document.getElementById('chartInfo').innerText = `총 ${state.candles.length.toLocaleString()}개의 캔들 로드됨`;
             } catch (e) { console.error(e); }
@@ -201,7 +222,7 @@
             for (let i = 0; i < chunks; i++) {
                 const response = await fetch(`https://api.upbit.com/v1/candles/${timeframe}?market=${market}&count=200${lastTime ? '&to=' + lastTime : ''}`);
                 const data = await response.json(); if (!data || data.length === 0) break;
-                const chunk = data.map(c => ({ time: Math.floor(new Date(c.candle_date_time_kst).getTime() / 1000), open: c.opening_price, high: c.high_price, low: c.low_price, close: c.trade_price, volume: c.candle_acc_trade_volume, raw_time: c.candle_date_time_kst }));
+                const chunk = data.map(c => ({ time: Math.floor(new Date(c.candle_date_time_kst + "+09:00").getTime() / 1000), open: c.opening_price, high: c.high_price, low: c.low_price, close: c.trade_price, volume: c.candle_acc_trade_volume, raw_time: c.candle_date_time_kst }));
                 allCandles = [...chunk.reverse(), ...allCandles]; lastTime = data[data.length - 1].candle_date_time_kst;
                 document.getElementById('simStatus').innerText = `수집 중 (${Math.round(((i + 1) / chunks) * 100)}%)`;
                 await new Promise(r => setTimeout(r, 50));

@@ -733,6 +733,10 @@
                         locale: 'ko-KR',
                         priceFormatter: val => fmt.format(val),
                         dateFormat: 'yyyy-MM-dd',
+                        timeFormatter: (time) => {
+                            const date = new Date(time * 1000);
+                            return `${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}:${String(date.getSeconds()).padStart(2, '0')}`;
+                        }
                     },
                     handleScroll: true,
                     handleScale: true,
